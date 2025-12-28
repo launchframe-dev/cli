@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Test files
+test-variant-system.js
+test-output/
+
+# Development files
+WORKFLOW.md
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

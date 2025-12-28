@@ -1,0 +1,48 @@
+{
+  "name": "@launchframe/cli",
+  "version": "0.1.12",
+  "description": "Production-ready B2B SaaS boilerplate with subscriptions, credits, and multi-tenancy",
+  "main": "src/index.js",
+  "bin": {
+    "launchframe": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "keywords": [
+    "saas",
+    "boilerplate",
+    "template",
+    "nestjs",
+    "react",
+    "nextjs",
+    "typescript",
+    "subscriptions",
+    "multi-tenant",
+    "b2b",
+    "starter-kit",
+    "cli"
+  ],
+  "author": "LaunchFrame",
+  "license": "MIT",
+  "homepage": "https://launchframe.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/launchframe/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/launchframe/cli/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "inquirer": "^8.2.5",
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.1.1",
+    "glob": "^10.3.10"
+  }
+}
