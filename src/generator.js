@@ -35,7 +35,7 @@ async function generateProject(answers, variantChoices, templateRoot) {
 
   // Define source (template) and destination paths
   // templateRoot is now passed as parameter (cache or local dev path)
-  const projectRoot = path.resolve(__dirname, '../..'); // For root-level files like .github, CLAUDE.md
+  const projectRoot = path.resolve(__dirname, '../..'); // For root-level files like .github, README.md
   const destinationRoot = path.resolve(process.cwd(), projectName);
 
   console.log(`📁 Template source: ${templateRoot}`);
@@ -146,7 +146,6 @@ async function generateProject(answers, variantChoices, templateRoot) {
   console.log('📋 Copying additional files...');
   const additionalFiles = [
     '.github',
-    'CLAUDE.md',
     'README.md',
     '.gitignore',
     'LICENSE'
