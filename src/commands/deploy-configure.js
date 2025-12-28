@@ -78,7 +78,6 @@ async function deployConfigure() {
     'admin-portal/src/components/common/PageTitle.tsx',
     'admin-portal/src/sentry.tsx',
     'admin-portal/src/pages/AppSumo.tsx',
-    'admin-portal/docs/GITHUB_ACTIONS_SETUP.md',
     'customers-portal/src/App.tsx'
   ];
 
