@@ -172,6 +172,16 @@ async function buildFullAppImages(projectRoot, projectName, githubOrg, envFilePa
       websiteBuildArgs
     );
   }
+
+  // Build docs (optional service - VitePress documentation)
+  if (installedServices.includes('docs')) {
+    await buildAndPushImage(
+      'docs',
+      path.join(projectRoot, 'docs'),
+      registry,
+      projectName
+    );
+  }
 }
 
 /**
