@@ -391,11 +391,25 @@ function getDockerComposeDefinitions(serviceName, service, projectName, projectC
       target: development
     image: ${projectName}-${serviceName}:dev
     restart: "no"
-    volumes:
-      - ../${serviceName}/.vitepress:/app/.vitepress
-      - ../${serviceName}/content:/app/content
-      - ../${serviceName}/public:/app/public
-      - ${serviceName}_node_modules:/app/node_modules
+    # File watching for automatic sync and rebuild
+    # - Code changes are synced automatically
+    # - package.json changes trigger rebuild + restart
+    develop:
+      watch:
+        - action: sync
+          path: ../${serviceName}
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+            - .vitepress/dist/
+            - coverage/
+            - '*.log'
+            - .git/
+        - action: rebuild
+          path: ../${serviceName}/package.json
+        - action: rebuild
+          path: ../${serviceName}/package-lock.json
     environment:
       - NODE_ENV=development
     ports:

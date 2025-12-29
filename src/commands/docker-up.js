@@ -19,18 +19,38 @@ async function dockerUp(serviceName) {
     process.exit(1);
   }
 
+  // Check Docker Compose version for watch support
+  try {
+    const composeVersion = execSync('docker compose version', { encoding: 'utf8' });
+    const versionMatch = composeVersion.match(/v?(\d+)\.(\d+)\.(\d+)/);
+    
+    if (versionMatch) {
+      const [, major, minor] = versionMatch.map(Number);
+      
+      if (major < 2 || (major === 2 && minor < 22)) {
+        console.error(chalk.red('\n❌ Error: Docker Compose v2.22+ is required for watch support'));
+        console.log(chalk.yellow(`Current version: Docker Compose v${major}.${minor}`));
+        console.log(chalk.gray('\nPlease upgrade Docker Compose:'));
+        console.log(chalk.white('  https://docs.docker.com/compose/install/\n'));
+        process.exit(1);
+      }
+    }
+  } catch (error) {
+    console.warn(chalk.yellow('⚠️  Could not detect Docker Compose version'));
+  }
+
   if (serviceName) {
-    console.log(chalk.blue.bold(`\n🚀 Starting ${serviceName} service\n`));
-    console.log(chalk.gray(`Starting ${serviceName} in detached mode...\n`));
+    console.log(chalk.blue.bold(`\n🚀 Starting ${serviceName} service with watch\n`));
+    console.log(chalk.gray(`Starting ${serviceName} with file watching enabled...\n`));
   } else {
-    console.log(chalk.blue.bold('\n🚀 Starting Docker Services\n'));
-    console.log(chalk.gray('Starting all services in detached mode...\n'));
+    console.log(chalk.blue.bold('\n🚀 Starting Docker Services with Watch\n'));
+    console.log(chalk.gray('Starting all services with file watching enabled...\n'));
   }
 
   try {
     const upCommand = serviceName
-      ? `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d ${serviceName}`
-      : 'docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d';
+      ? `docker-compose -f docker-compose.yml -f docker-compose.dev.yml watch ${serviceName}`
+      : 'docker-compose -f docker-compose.yml -f docker-compose.dev.yml watch';
 
     console.log(chalk.gray(`Running: ${upCommand}\n`));
 
@@ -40,12 +60,19 @@ async function dockerUp(serviceName) {
     });
 
     if (serviceName) {
-      console.log(chalk.green.bold(`\n✅ ${serviceName} service started successfully!\n`));
-      console.log(chalk.white('Useful commands:'));
-      console.log(chalk.gray(`  launchframe docker:logs ${serviceName}   # View logs`));
-      console.log(chalk.gray(`  docker-compose -f docker-compose.yml -f docker-compose.dev.yml down ${serviceName}   # Stop service\n`));
+      console.log(chalk.green.bold(`\n✅ ${serviceName} service started with watch!\n`));
+      console.log(chalk.yellow('📺 Watching for file changes (press Ctrl+C to stop)...\n'));
+      console.log(chalk.white('Watch behavior:'));
+      console.log(chalk.gray('  • Code changes → Auto-sync to container'));
+      console.log(chalk.gray('  • package.json → Auto-rebuild & restart\n'));
+      console.log(chalk.white('To stop:'));
+      console.log(chalk.gray('  Press Ctrl+C in this terminal\n'));
     } else {
-      console.log(chalk.green.bold('\n✅ All services started successfully!\n'));
+      console.log(chalk.green.bold('\n✅ All services started with watch!\n'));
+      console.log(chalk.yellow('📺 Watching for file changes (press Ctrl+C to stop)...\n'));
+      console.log(chalk.white('Watch behavior:'));
+      console.log(chalk.gray('  • Code changes → Auto-sync to containers'));
+      console.log(chalk.gray('  • package.json → Auto-rebuild & restart\n'));
       console.log(chalk.white('Services running at:'));
       console.log(chalk.gray('  Backend API:      http://localhost:4000'));
       console.log(chalk.gray('  Admin Panel:      http://localhost:3001'));
@@ -57,11 +84,10 @@ async function dockerUp(serviceName) {
       }
 
       console.log(chalk.gray('  Marketing Site:   http://localhost:8080\n'));
-      console.log(chalk.white('Useful commands:'));
-      console.log(chalk.gray('  launchframe docker:logs       # View logs from all services'));
-      console.log(chalk.gray('  launchframe docker:logs backend   # View logs from specific service'));
-      console.log(chalk.gray('  launchframe docker:down       # Stop services (keeps data)'));
-      console.log(chalk.gray('  launchframe docker:destroy    # Remove all resources\n'));
+      console.log(chalk.white('To stop all services:'));
+      console.log(chalk.gray('  Press Ctrl+C in this terminal'));
+      console.log(chalk.gray('  Or run: launchframe docker:down\n'));
+      console.log(chalk.cyan('💡 Tip (Linux/Mac): Add & at the end to run in background\n'));
     }
 
   } catch (error) {
