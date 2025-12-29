@@ -55,7 +55,10 @@ function escapeRegex(string) {
  */
 async function replaceVariablesInFile(filePath, variables) {
   try {
-    let content = await fs.readFile(filePath, 'utf8');
+    // Read file content - preserve line endings for shell scripts
+    // Use binary mode to avoid Node.js line ending normalization on Windows
+    const buffer = await fs.readFile(filePath);
+    let content = buffer.toString('utf8');
     let modified = false;
 
     // Replace each variable using regex with negative lookbehind
@@ -74,8 +77,10 @@ async function replaceVariablesInFile(filePath, variables) {
     }
 
     // Only write if changes were made
+    // Write as Buffer to preserve original line endings
     if (modified) {
-      await fs.writeFile(filePath, content, 'utf8');
+      const outputBuffer = Buffer.from(content, 'utf8');
+      await fs.writeFile(filePath, outputBuffer);
     }
 
     return modified;
