@@ -4,13 +4,6 @@
 
 LaunchFrame is a production-ready SaaS boilerplate that deploys to a single affordable VPS. Get subscriptions, credits, multi-tenancy, feature gating, and API management out of the box.
 
-## Status
-
-LaunchFrame is currently in **private beta**. This CLI exists but does not yet generate projects.
-
-**[Join the waitlist at launchframe.dev](https://launchframe.dev)** to get early access, exclusive updates, and founding member perks.
-
-Here's a sneak peek of the CLI experience:
 ![LaunchFrame CLI Preview](https://unpkg.com/@launchframe/cli@latest/cli.png)
 
 ## What You Get
@@ -30,14 +23,39 @@ Here's a sneak peek of the CLI experience:
 ## Installation
 
 ```bash
-npx @launchframe/cli init
+npm install -g @launchframe/cli
 ```
 
-## Early Access
+## Quick Start
 
-LaunchFrame is currently in **private beta**.
+Initialize a new LaunchFrame project:
 
-Join the waitlist at **[launchframe.dev](https://launchframe.dev)** to get early access, exclusive updates, and founding member perks.
+```bash
+launchframe init
+```
+
+### Local Development
+
+Start the full stack locally with Docker:
+
+```bash
+launchframe docker:up
+```
+
+This spins up all services (backend, admin portal, customer portal, website, database, etc.) with hot-reload enabled. Build your domain logic, customize the UI, and test everything locally.
+
+### Deployment
+
+When you're ready to deploy to your VPS:
+
+```bash
+launchframe deploy:configure  # Set up deployment configuration
+launchframe deploy:set-env    # Configure environment variables
+launchframe deploy:init       # Initialize the VPS
+launchframe deploy:up         # Deploy to production
+```
+
+**[Get started at launchframe.dev](https://launchframe.dev)** | **[Read the docs at docs.launchframe.dev](https://docs.launchframe.dev)**
 
 ## Why LaunchFrame?
 
@@ -52,6 +70,17 @@ Most SaaS boilerplates give you authentication and a database. LaunchFrame gives
 - Comprehensive documentation
 
 All tested in production. All ready to customize.
+
+## Documentation
+
+Full documentation is available at **[docs.launchframe.dev](https://docs.launchframe.dev)**, including:
+
+- Getting started guides
+- Architecture overview
+- Deployment instructions
+- API reference
+- Feature customization guides
+- Multi-tenancy patterns
 
 ## License
 

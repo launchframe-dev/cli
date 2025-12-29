@@ -18,31 +18,8 @@ function isLaunchFrameProject() {
  * Check if running in development mode (local) vs production (npm install)
  */
 function isDevMode() {
-  // If LAUNCHFRAME_DEV env var is explicitly set, use it
-  if (process.env.LAUNCHFRAME_DEV === 'true') {
-    return true;
-  }
-  if (process.env.LAUNCHFRAME_DEV === 'false') {
-    return false;
-  }
-
-  // Check if running from node_modules (production) or local directory (dev)
-  const scriptPath = __dirname;
-
-  // Check multiple indicators that we're in production:
-  // 1. Running from node_modules
-  // 2. Running from npm cache (_npx or .npm)
-  // 3. Package name in path
-  const isInNodeModules = scriptPath.includes('node_modules');
-  const isInNpmCache = scriptPath.includes('_npx') || scriptPath.includes('.npm');
-  const isInPackage = scriptPath.includes('@launchframe');
-
-  // If any production indicator is found, we're NOT in dev mode
-  if (isInNodeModules || isInNpmCache || isInPackage) {
-    return false;
-  }
-
-  return true;
+  // Only use dev mode if LAUNCHFRAME_DEV is explicitly set to 'true'
+  return process.env.LAUNCHFRAME_DEV === 'true';
 }
 
 /**
