@@ -53,7 +53,9 @@ async function dockerDestroy(options = {}) {
       const runningContainerIds = execSync(`docker ps --filter "name=${projectName}" -q`, { encoding: 'utf8' }).trim();
       if (runningContainerIds) {
         const ids = runningContainerIds.replace(/\n/g, ' ');
-        execSync(`docker stop ${ids}`, { stdio: 'inherit' });
+        // Use pipe mode instead of inherit to avoid Windows stdio issues
+        const output = execSync(`docker stop ${ids}`, { encoding: 'utf8' });
+        if (output) console.log(output);
       }
     } catch (error) {
       // Ignore errors if no running containers
@@ -65,7 +67,8 @@ async function dockerDestroy(options = {}) {
       const containerIds = execSync(`docker ps -a --filter "name=${projectName}" -q`, { encoding: 'utf8' }).trim();
       if (containerIds) {
         const ids = containerIds.replace(/\n/g, ' ');
-        execSync(`docker rm -f ${ids}`, { stdio: 'inherit' });
+        const output = execSync(`docker rm -f ${ids}`, { encoding: 'utf8' });
+        if (output) console.log(output);
       }
     } catch (error) {
       // Ignore errors if no containers found
@@ -74,7 +77,8 @@ async function dockerDestroy(options = {}) {
     // Step 3: Remove network (must be after containers are removed)
     console.log(chalk.gray('Removing network...'));
     try {
-      execSync(`docker network rm ${projectName}-network`, { stdio: 'inherit' });
+      const output = execSync(`docker network rm ${projectName}-network`, { encoding: 'utf8' });
+      if (output) console.log(output);
     } catch (error) {
       // Ignore errors if network doesn't exist or has active endpoints
     }
@@ -85,7 +89,8 @@ async function dockerDestroy(options = {}) {
       const volumeIds = execSync(`docker volume ls --filter "name=${projectName}" -q`, { encoding: 'utf8' }).trim();
       if (volumeIds) {
         const ids = volumeIds.replace(/\n/g, ' ');
-        execSync(`docker volume rm ${ids}`, { stdio: 'inherit' });
+        const output = execSync(`docker volume rm ${ids}`, { encoding: 'utf8' });
+        if (output) console.log(output);
       }
     } catch (error) {
       // Ignore errors if no volumes found
@@ -97,7 +102,8 @@ async function dockerDestroy(options = {}) {
       const imageIds = execSync(`docker images --filter "reference=${projectName}*" -q`, { encoding: 'utf8' }).trim();
       if (imageIds) {
         const ids = imageIds.replace(/\n/g, ' ');
-        execSync(`docker rmi -f ${ids}`, { stdio: 'inherit' });
+        const output = execSync(`docker rmi -f ${ids}`, { encoding: 'utf8' });
+        if (output) console.log(output);
       }
     } catch (error) {
       // Ignore errors if no images found
