@@ -158,6 +158,22 @@ async function deployInit() {
     process.exit(1);
   }
 
+  // Create symlink for docker-compose.override.yml -> docker-compose.prod.yml
+  const symlinkSpinner = ora('Creating docker-compose.override.yml symlink...').start();
+
+  try {
+    await executeSSH(
+      vpsUser,
+      vpsHost,
+      `cd ${vpsAppFolder}/infrastructure && ln -sf docker-compose.prod.yml docker-compose.override.yml`
+    );
+    symlinkSpinner.succeed('Docker Compose override symlink created');
+  } catch (error) {
+    symlinkSpinner.fail('Failed to create symlink');
+    console.log(chalk.red(`\n❌ Error: ${error.message}\n`));
+    process.exit(1);
+  }
+
   // Check if waitlist is running and stop it (full-app deployment)
   try {
     const { stdout: psOutput } = await executeSSH(
