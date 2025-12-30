@@ -464,6 +464,12 @@ function getDockerComposeDefinitions(serviceName, service, projectName, projectC
   ${serviceName}:
     image: ghcr.io/${githubOrg}/${projectName}-${serviceName}:latest
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.${serviceName}.rule=Host(\`${serviceName}.\${PRIMARY_DOMAIN}\`)"

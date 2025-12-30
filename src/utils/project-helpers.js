@@ -7,7 +7,11 @@ const chalk = require('chalk');
  */
 function isLaunchFrameProject() {
   const markerPath = path.join(process.cwd(), '.launchframe');
-  return fs.existsSync(markerPath);
+  try {
+    return fs.existsSync(markerPath) && fs.statSync(markerPath).isFile();
+  } catch (error) {
+    return false;
+  }
 }
 
 /**
