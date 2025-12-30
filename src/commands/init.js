@@ -5,14 +5,7 @@ const { runInitPrompts, runVariantPrompts } = require('../prompts');
 const { generateProject } = require('../generator');
 const { checkGitHubAccess, showAccessDeniedMessage } = require('../utils/github-access');
 const { ensureCacheReady } = require('../utils/module-cache');
-
-/**
- * Check if current directory is a LaunchFrame project
- */
-function isLaunchFrameProject() {
-  const markerPath = path.join(process.cwd(), '.launchframe');
-  return fs.existsSync(markerPath);
-}
+const { isLaunchFrameProject } = require('../utils/project-helpers');
 
 /**
  * Check if running in development mode (local) vs production (npm install)
