@@ -67,15 +67,8 @@ async function main() {
 
   // No command provided
   if (!command) {
-    if (inProject) {
-      console.error(chalk.red('\n❌ Error: No command specified'));
-      help();
-      process.exit(1);
-    } else {
-      // Outside project, default to init
-      await init(flags);
-      return;
-    }
+    help();
+    process.exit(inProject ? 1 : 0);
   }
 
   // Route commands
