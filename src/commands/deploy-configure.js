@@ -71,15 +71,24 @@ async function deployConfigure() {
     'admin-portal/public/env-config.js',
     'admin-portal/src/config/runtime.ts',
     'admin-portal/src/config/pageMetadata.ts',
-    'admin-portal/src/pages/FirstProject.tsx',
-    'admin-portal/src/components/projects/NewProject.tsx',
-    'admin-portal/src/components/settings/CustomDomain.tsx',
     'admin-portal/src/App.tsx',
     'admin-portal/src/components/common/PageTitle.tsx',
     'admin-portal/src/sentry.tsx',
-    'admin-portal/src/pages/AppSumo.tsx',
-    'customers-portal/src/App.tsx'
   ];
+
+  if (config.variants.tenancy === 'multi-tenant') {
+    filesToUpdate.push(
+      'admin-portal/src/pages/FirstProject.tsx',
+      'admin-portal/src/components/projects/NewProject.tsx',
+    );
+  }
+
+  if (config.variants.userModel === 'b2b2c') {
+    filesToUpdate.push(
+      'admin-portal/src/components/settings/CustomDomain.tsx',
+      'customers-portal/src/App.tsx'
+    )
+  }
 
   const projectRoot = process.cwd();
   let filesUpdated = 0;
