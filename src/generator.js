@@ -73,7 +73,7 @@ async function generateProject(answers, variantChoices, templateRoot) {
 
   // Step 2: Process admin-portal service with variants
   // Note: admin-portal folder might not exist yet in templates, skip if missing
-  const adminPortalTemplatePath = path.join(templateRoot, 'admin-portal/templates/base');
+  const adminPortalTemplatePath = path.join(templateRoot, 'admin-portal/base');
   if (await fs.pathExists(adminPortalTemplatePath)) {
     console.log('🔧 Processing admin-portal service...');
     await processServiceVariant(
@@ -98,7 +98,7 @@ async function generateProject(answers, variantChoices, templateRoot) {
   // Step 3: Process customers-portal service (ONLY if B2B2C selected)
   if (variantChoices.userModel === 'b2b2c') {
     // Note: customers-portal folder might not exist yet in templates, skip if missing
-    const customersPortalTemplatePath = path.join(templateRoot, 'customers-portal/templates/base');
+    const customersPortalTemplatePath = path.join(templateRoot, 'customers-portal/base');
     if (await fs.pathExists(customersPortalTemplatePath)) {
       console.log('🔧 Processing customers-portal service...');
       await processServiceVariant(

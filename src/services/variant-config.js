@@ -11,9 +11,9 @@
 
 const VARIANT_CONFIG = {
   backend: {
-    base: 'backend/templates/base',
-    sectionsDir: 'backend/templates/sections',
-    filesDir: 'backend/templates/files',
+    base: 'backend/base',
+    sectionsDir: 'backend/variants/sections',
+    filesDir: 'backend/variants/files',
 
     variants: {
       // Multi-tenant variant: Adds project/workspace support
@@ -180,9 +180,9 @@ const VARIANT_CONFIG = {
 
   // Admin portal inherits tenancy choice from backend
   'admin-portal': {
-    base: 'admin-portal/templates/base',
-    sectionsDir: 'admin-portal/templates/sections',
-    filesDir: 'admin-portal/templates/files',
+    base: 'admin-portal/base',
+    sectionsDir: 'admin-portal/variants/sections',
+    filesDir: 'admin-portal/variants/files',
 
     variants: {
       'multi-tenant': {
@@ -284,9 +284,9 @@ const VARIANT_CONFIG = {
 
   // Customers portal (B2B2C only - no pure B2B use case)
   'customers-portal': {
-    base: 'customers-portal/templates/base',  // B2B2C + Single-tenant base
-    sectionsDir: 'customers-portal/templates/sections',
-    filesDir: 'customers-portal/templates/files',
+    base: 'customers-portal/base',  // B2B2C + Single-tenant base
+    sectionsDir: 'customers-portal/variants/sections',
+    filesDir: 'customers-portal/variants/files',
 
     variants: {
       'single-tenant': {
@@ -321,9 +321,9 @@ const VARIANT_CONFIG = {
 
   // Infrastructure (Docker Compose orchestration)
   infrastructure: {
-    base: 'infrastructure',
-    sectionsDir: 'infrastructure/templates/sections',
-    filesDir: 'infrastructure/templates/files',
+    base: 'infrastructure/base',
+    sectionsDir: 'infrastructure/variants/sections',
+    filesDir: 'infrastructure/variants/files',
 
     variants: {
       // B2B2C variant: Adds customers-portal service to docker-compose files
