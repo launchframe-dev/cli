@@ -8,7 +8,7 @@ const { isLaunchFrameProject, getProjectConfig, updateProjectConfig, getPrimaryD
 const { replaceVariables } = require('../utils/variable-replacer');
 const { updateEnvFile } = require('../utils/env-generator');
 const { checkGitHubAccess, showAccessDeniedMessage } = require('../utils/github-access');
-const { ensureCacheReady, getModulePath } = require('../utils/module-cache');
+const { ensureCacheReady, getServicePath } = require('../utils/service-cache');
 
 async function serviceAdd(serviceName) {
   // STEP 1: Validation
@@ -75,13 +75,13 @@ async function serviceAdd(serviceName) {
   let sourceDir;
 
   if (isDevMode) {
-    // Local development: copy from launchframe-dev/modules directory
+    // Local development: copy from launchframe-dev/services directory
     console.log(chalk.blue('\n[DEV MODE] Copying service from local directory...'));
-    sourceDir = path.resolve(__dirname, '../../../modules', serviceName);
+    sourceDir = path.resolve(__dirname, '../../../services', serviceName);
 
     if (!fs.existsSync(sourceDir)) {
       console.error(chalk.red(`Error: Local service directory not found: ${sourceDir}`));
-      console.log('Make sure the service exists in the modules directory');
+      console.log('Make sure the service exists in the services directory');
       process.exit(1);
     }
   } else {
@@ -98,9 +98,9 @@ async function serviceAdd(serviceName) {
     console.log(chalk.green('✓ Repository access confirmed'));
     
     try {
-      // Ensure cache has this service module
+      // Ensure cache has this service
       await ensureCacheReady([serviceName]);
-      sourceDir = getModulePath(serviceName);
+      sourceDir = getServicePath(serviceName);
     } catch (error) {
       console.error(chalk.red(`\n❌ Error: ${error.message}\n`));
       process.exit(1);

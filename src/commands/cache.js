@@ -1,11 +1,11 @@
 const chalk = require('chalk');
-const { clearCache, getCacheInfo } = require('../utils/module-cache');
+const { clearCache, getCacheInfo } = require('../utils/service-cache');
 
 /**
- * Clear module cache
+ * Clear service cache
  */
 async function cacheClear() {
-  console.log(chalk.yellow('\n⚠️  This will delete all cached modules'));
+  console.log(chalk.yellow('\n⚠️  This will delete all cached services'));
   console.log(chalk.gray('You will need to re-download on next init or service:add\n'));
   
   const inquirer = require('inquirer');
@@ -30,7 +30,7 @@ async function cacheClear() {
 async function cacheInfo() {
   const info = await getCacheInfo();
   
-  console.log(chalk.blue('\n📦 Module Cache Information\n'));
+  console.log(chalk.blue('\n📦 Service Cache Information\n'));
   
   console.log(chalk.white('Location:'));
   console.log(chalk.gray(`  ${info.path}\n`));
@@ -54,14 +54,14 @@ async function cacheInfo() {
     console.log(chalk.gray(`  ${info.lastUpdate.toLocaleString()}\n`));
   }
   
-  if (info.modules && info.modules.length > 0) {
-    console.log(chalk.white('Cached Modules:'));
-    info.modules.forEach(mod => {
+  if (info.services && info.services.length > 0) {
+    console.log(chalk.white('Cached Services:'));
+    info.services.forEach(mod => {
       console.log(chalk.gray(`  • ${mod}`));
     });
     console.log('');
   } else {
-    console.log(chalk.gray('No modules cached yet\n'));
+    console.log(chalk.gray('No services cached yet\n'));
   }
   
   console.log(chalk.gray('Commands:'));
@@ -73,21 +73,21 @@ async function cacheInfo() {
  * Force update cache
  */
 async function cacheUpdate() {
-  const { ensureCacheReady, getCacheInfo } = require('../utils/module-cache');
+  const { ensureCacheReady, getCacheInfo } = require('../utils/service-cache');
   
   console.log(chalk.blue('\n🔄 Forcing cache update...\n'));
   
   try {
     const info = await getCacheInfo();
-    const currentModules = info.modules || [];
+    const currentServices = info.services || [];
     
-    if (currentModules.length === 0) {
-      console.log(chalk.yellow('No modules in cache yet. Use init or service:add to populate.\n'));
+    if (currentServices.length === 0) {
+      console.log(chalk.yellow('No services in cache yet. Use init or service:add to populate.\n'));
       return;
     }
     
-    // Update cache with current modules
-    await ensureCacheReady(currentModules);
+    // Update cache with current services
+    await ensureCacheReady(currentServices);
     console.log(chalk.green('\n✓ Cache updated successfully\n'));
   } catch (error) {
     console.error(chalk.red(`\n❌ Failed to update cache: ${error.message}\n`));

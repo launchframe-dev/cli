@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const { runInitPrompts, runVariantPrompts } = require('../prompts');
 const { generateProject } = require('../generator');
 const { checkGitHubAccess, showAccessDeniedMessage } = require('../utils/github-access');
-const { ensureCacheReady } = require('../utils/module-cache');
+const { ensureCacheReady } = require('../utils/service-cache');
 const { isLaunchFrameProject } = require('../utils/project-helpers');
 
 /**
@@ -116,8 +116,8 @@ async function init(options = {}) {
       variantChoices = await runVariantPrompts();
     }
 
-    // Determine which modules are needed based on variant choices
-    const requiredModules = [
+    // Determine which services are needed based on variant choices
+    const requiredServices = [
       'backend',
       'admin-portal',
       'infrastructure',
@@ -126,20 +126,20 @@ async function init(options = {}) {
     
     // Add customers-portal only if B2B2C mode
     if (variantChoices.userModel === 'b2b2c') {
-      requiredModules.push('customers-portal');
+      requiredServices.push('customers-portal');
     }
 
     // Determine template source (dev mode = local, production = cache)
     let templateRoot;
     
     if (devMode) {
-      // Dev mode: Use local modules directory
-      templateRoot = path.resolve(__dirname, '../../../modules');
-      console.log(chalk.gray(`[DEV MODE] Using local modules: ${templateRoot}\n`));
+      // Dev mode: Use local services directory
+      templateRoot = path.resolve(__dirname, '../../../services');
+      console.log(chalk.gray(`[DEV MODE] Using local services: ${templateRoot}\n`));
     } else {
       // Production mode: Use cache
       try {
-        templateRoot = await ensureCacheReady(requiredModules);
+        templateRoot = await ensureCacheReady(requiredServices);
       } catch (error) {
         console.error(chalk.red(`\n❌ Error: ${error.message}\n`));
         process.exit(1);

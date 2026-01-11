@@ -142,7 +142,7 @@ async function generateProject(answers, variantChoices, templateRoot) {
   await replaceVariables(path.join(destinationRoot, 'website'), variables);
   initGitRepo(path.join(destinationRoot, 'website'), 'website');
 
-  // Step 5: Copy additional files (from project root, not modules/)
+  // Step 5: Copy additional files (from project root, not services/)
   console.log('📋 Copying additional files...');
   const additionalFiles = [
     '.github',
@@ -174,13 +174,13 @@ async function generateProject(answers, variantChoices, templateRoot) {
   // Step 7: Create .launchframe marker file with variant metadata
   console.log('📝 Creating LaunchFrame marker file...');
   const markerPath = path.join(destinationRoot, '.launchframe');
-  
+
   // Determine which services were installed
   const installedServices = ['backend', 'admin-portal', 'infrastructure', 'website'];
   if (variantChoices.userModel === 'b2b2c') {
     installedServices.push('customers-portal');
   }
-  
+
   const markerContent = {
     version: '0.1.0',
     createdAt: new Date().toISOString(),

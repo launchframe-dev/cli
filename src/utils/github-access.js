@@ -14,14 +14,14 @@ function makeClickable(text, url) {
 }
 
 /**
- * Check if user has SSH access to LaunchFrame modules repository
+ * Check if user has SSH access to LaunchFrame services repository
  * @returns {Promise<{hasAccess: boolean, error?: string}>}
  */
 async function checkGitHubAccess() {
   try {
     // Test SSH access by checking if we can list remote refs
     execSync(
-      'git ls-remote git@github.com:launchframe-dev/modules.git HEAD',
+      'git ls-remote git@github.com:launchframe-dev/services.git HEAD',
       { 
         timeout: 15000,
         stdio: 'pipe' // Don't show output
@@ -37,14 +37,14 @@ async function checkGitHubAccess() {
 }
 
 /**
- * Display message when user doesn't have access to modules repository
+ * Display message when user doesn't have access to services repository
  * Guides them to either purchase or setup SSH keys
  */
 function showAccessDeniedMessage() {
   const purchaseUrl = 'https://buy.polar.sh/polar_cl_Zy4YqEwhoIEdUrAH8vHaWuZtwZuv306sYMnq118MbKi';
   const docsUrl = 'https://docs.launchframe.dev/guide/quick-start#add-ssh-key-to-repo';
   
-  console.log(chalk.red('\n❌ Cannot access LaunchFrame modules repository\n'));
+  console.log(chalk.red('\n❌ Cannot access LaunchFrame services repository\n'));
   
   console.log(chalk.white('This could mean:\n'));
   console.log(chalk.gray('  1. You haven\'t purchased LaunchFrame yet'));

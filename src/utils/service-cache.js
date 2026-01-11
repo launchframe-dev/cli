@@ -4,7 +4,7 @@ const os = require('os');
 const { execSync } = require('child_process');
 const chalk = require('chalk');
 
-const MODULES_REPO = 'git@github.com:launchframe-dev/modules.git';
+const SERVICES_REPO = 'git@github.com:launchframe-dev/services.git';
 const BRANCH = 'main';
 
 /**
@@ -15,9 +15,9 @@ const BRANCH = 'main';
 function getCacheDir() {
   const homeDir = os.homedir();
   // Use same path structure on all platforms
-  // Windows: C:\Users\username\.launchframe\cache\modules
-  // Mac/Linux: /home/username/.launchframe/cache/modules
-  return path.join(homeDir, '.launchframe', 'cache', 'modules');
+  // Windows: C:\Users\username\.launchframe\cache\services
+  // Mac/Linux: /home/username/.launchframe/cache/services
+  return path.join(homeDir, '.launchframe', 'cache', 'services');
 }
 
 /**
@@ -32,33 +32,33 @@ async function cacheExists() {
 
 /**
  * Initialize cache with sparse checkout
- * Clones only the repository structure, no modules yet
+ * Clones only the repository structure, no services yet
  * @returns {Promise<void>}
  */
 async function initializeCache() {
   const cacheDir = getCacheDir();
-  
-  console.log(chalk.blue('🔄 Initializing module cache...'));
-  
+
+  console.log(chalk.blue('🔄 Initializing services cache...'));
+
   try {
     // Ensure parent directory exists
     await fs.ensureDir(path.dirname(cacheDir));
-    
-    // Sparse clone (only root files, no modules)
+
+    // Sparse clone (only root files, no services)
     execSync(
-      `git clone --sparse --depth 1 --branch ${BRANCH} ${MODULES_REPO} "${cacheDir}"`,
-      { 
+      `git clone --sparse --depth 1 --branch ${BRANCH} ${SERVICES_REPO} "${cacheDir}"`,
+      {
         stdio: 'pipe', // Hide output
         timeout: 60000 // 1 minute timeout
       }
     );
-    
+
     // Configure sparse checkout (starts with empty set)
     execSync('git sparse-checkout init --cone', {
       cwd: cacheDir,
       stdio: 'pipe'
     });
-    
+
     console.log(chalk.green('✓ Cache initialized'));
   } catch (error) {
     // Clean up partial clone on failure
@@ -74,16 +74,16 @@ async function initializeCache() {
  */
 async function updateCache() {
   const cacheDir = getCacheDir();
-  
-  console.log(chalk.blue('🔄 Updating module cache...'));
-  
+
+  console.log(chalk.blue('🔄 Updating service cache...'));
+
   try {
     execSync('git pull origin main', {
       cwd: cacheDir,
       stdio: 'pipe',
       timeout: 30000 // 30 seconds
     });
-    
+
     console.log(chalk.green('✓ Cache updated'));
   } catch (error) {
     throw new Error(`Failed to update cache: ${error.message}`);
@@ -91,53 +91,53 @@ async function updateCache() {
 }
 
 /**
- * Expand sparse checkout to include specific modules
- * @param {string[]} moduleNames - Array of module names to expand
+ * Expand sparse checkout to include specific services
+ * @param {string[]} serviceNames - Array of services names to expand
  * @returns {Promise<void>}
  */
-async function expandModules(moduleNames) {
+async function expandServices(serviceNames) {
   const cacheDir = getCacheDir();
-  
-  console.log(chalk.blue(`📦 Loading modules: ${moduleNames.join(', ')}...`));
-  
+
+  console.log(chalk.blue(`📦 Loading services: ${serviceNames.join(', ')}...`));
+
   try {
     // Get current sparse checkout list
-    let currentModules = [];
+    let currentServices = [];
     try {
       const output = execSync('git sparse-checkout list', {
         cwd: cacheDir,
         stdio: 'pipe',
         encoding: 'utf8'
       });
-      currentModules = output.trim().split('\n').filter(Boolean);
+      currentServices = output.trim().split('\n').filter(Boolean);
     } catch (error) {
-      // No modules yet, that's fine
+      // No services yet, that's fine
     }
-    
-    // Add new modules to the list
-    const allModules = [...new Set([...currentModules, ...moduleNames])];
-    
-    // Set sparse checkout to include all modules
-    execSync(`git sparse-checkout set ${allModules.join(' ')}`, {
+
+    // Add new services to the list
+    const allServices = [...new Set([...currentServices, ...serviceNames])];
+
+    // Set sparse checkout to include all services
+    execSync(`git sparse-checkout set ${allServices.join(' ')}`, {
       cwd: cacheDir,
       stdio: 'pipe',
       timeout: 60000 // 1 minute (may need to download files)
     });
-    
-    console.log(chalk.green('✓ Modules loaded'));
+
+    console.log(chalk.green('✓ Services loaded'));
   } catch (error) {
-    throw new Error(`Failed to expand modules: ${error.message}`);
+    throw new Error(`Failed to expand services: ${error.message}`);
   }
 }
 
 /**
- * Get path to a specific module in the cache
- * @param {string} moduleName - Module name (e.g., 'backend', 'admin-portal')
- * @returns {string} Absolute path to module
+ * Get path to a specific service in the cache
+ * @param {string} serviceName - Service name (e.g., 'backend', 'admin-portal')
+ * @returns {string} Absolute path to service
  */
-function getModulePath(moduleName) {
+function getServicePath(serviceName) {
   const cacheDir = getCacheDir();
-  return path.join(cacheDir, moduleName);
+  return path.join(cacheDir, serviceName);
 }
 
 /**
@@ -149,13 +149,13 @@ function getCachePath() {
 }
 
 /**
- * Clear the entire module cache
+ * Clear the entire service cache
  * Useful for troubleshooting or forcing fresh download
  * @returns {Promise<void>}
  */
 async function clearCache() {
   const cacheDir = getCacheDir();
-  
+
   if (await fs.pathExists(cacheDir)) {
     await fs.remove(cacheDir);
     console.log(chalk.green('✓ Cache cleared'));
@@ -165,8 +165,8 @@ async function clearCache() {
 }
 
 /**
- * Get cache information (size, last update, modules)
- * @returns {Promise<{exists: boolean, path: string, size?: number, modules?: string[], lastUpdate?: Date}>}
+ * Get cache information (size, last update, services)
+ * @returns {Promise<{exists: boolean, path: string, size?: number, services?: string[], lastUpdate?: Date}>}
  */
 async function getCacheInfo() {
   const cacheDir = getCacheDir();
@@ -174,13 +174,13 @@ async function getCacheInfo() {
     exists: false,
     path: cacheDir
   };
-  
+
   if (!(await cacheExists())) {
     return info;
   }
-  
+
   info.exists = true;
-  
+
   try {
     // Get cache size (du command works on Unix/Mac, different on Windows)
     if (process.platform === 'win32') {
@@ -201,19 +201,19 @@ async function getCacheInfo() {
   } catch (error) {
     // Size calculation failed, not critical
   }
-  
+
   try {
-    // Get list of expanded modules
+    // Get list of expanded services
     const output = execSync('git sparse-checkout list', {
       cwd: cacheDir,
       encoding: 'utf8',
       stdio: 'pipe'
     });
-    info.modules = output.trim().split('\n').filter(Boolean);
+    info.services = output.trim().split('\n').filter(Boolean);
   } catch (error) {
-    info.modules = [];
+    info.services = [];
   }
-  
+
   try {
     // Get last update time from git log
     const output = execSync('git log -1 --format=%cd --date=iso', {
@@ -225,17 +225,17 @@ async function getCacheInfo() {
   } catch (error) {
     // Last update time failed, not critical
   }
-  
+
   return info;
 }
 
 /**
  * Ensure cache is ready (initialize if needed, update if exists)
  * This is the main entry point for cache management
- * @param {string[]} requiredModules - Modules needed for the operation
+ * @param {string[]} requiredServices - Services needed for the operation
  * @returns {Promise<string>} Path to cache root
  */
-async function ensureCacheReady(requiredModules) {
+async function ensureCacheReady(requiredServices) {
   try {
     if (!(await cacheExists())) {
       // Cache doesn't exist, initialize it
@@ -244,10 +244,10 @@ async function ensureCacheReady(requiredModules) {
       // Cache exists, update it
       await updateCache();
     }
-    
-    // Expand sparse checkout to include required modules
-    await expandModules(requiredModules);
-    
+
+    // Expand sparse checkout to include required services
+    await expandServices(requiredServices);
+
     return getCachePath();
   } catch (error) {
     // If we fail and it's a network error, provide helpful message
@@ -265,8 +265,8 @@ module.exports = {
   cacheExists,
   initializeCache,
   updateCache,
-  expandModules,
-  getModulePath,
+  expandServices,
+  getServicePath,
   getCachePath,
   clearCache,
   getCacheInfo,

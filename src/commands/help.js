@@ -40,7 +40,7 @@ function help() {
     console.log(chalk.white('Available Services:'));
     console.log(chalk.gray('  waitlist          Coming soon page with email collection\n'));
     console.log(chalk.white('Cache Management:'));
-    console.log(chalk.gray('  cache:info        Show cache location, size, and cached modules'));
+    console.log(chalk.gray('  cache:info        Show cache location, size, and cached services'));
     console.log(chalk.gray('  cache:update      Force update cache to latest version'));
     console.log(chalk.gray('  cache:clear       Delete cache (re-download on next use)\n'));
     console.log(chalk.white('Other commands:'));
@@ -75,7 +75,7 @@ function help() {
     console.log(chalk.gray('    --user-model <b2b|b2b2c>  User model (skips prompt)'));
     console.log(chalk.gray('  help                        Show this help message\n'));
     console.log(chalk.white('Cache Management:'));
-    console.log(chalk.gray('  cache:info        Show cache location, size, and cached modules'));
+    console.log(chalk.gray('  cache:info        Show cache location, size, and cached services'));
     console.log(chalk.gray('  cache:update      Force update cache to latest version'));
     console.log(chalk.gray('  cache:clear       Delete cache (re-download on next use)\n'));
     console.log(chalk.white('Examples:'));
