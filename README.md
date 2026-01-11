@@ -2,6 +2,12 @@
 
 > Ship your B2B SaaS to production in hours, not weeks.
 
+---
+
+**🚀 We're looking for beta testers!** Get free lifetime access to LaunchFrame by joining our [Discord server](https://discord.gg/mH7Xjfeye2) or emailing us at [support@launchframe.dev](mailto:support@launchframe.dev).
+
+---
+
 LaunchFrame is a production-ready SaaS boilerplate that deploys to a single affordable VPS. Get subscriptions, credits, multi-tenancy, feature gating, and API management out of the box.
 
 ![LaunchFrame CLI Preview](https://unpkg.com/@launchframe/cli@latest/cli.png)
