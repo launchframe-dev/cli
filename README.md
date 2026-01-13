@@ -1,10 +1,10 @@
 # LaunchFrame CLI
 
-> Ship your B2B SaaS to production in hours, not weeks.
+> Ship your B2B SaaS to production in hours, not months.
 
 ---
 
-**🚀 We're looking for beta testers!** Get free lifetime access to LaunchFrame by joining our [Discord server](https://discord.gg/mH7Xjfeye2) or emailing us at [support@launchframe.dev](mailto:support@launchframe.dev).
+**🚀 We're looking for beta testers!** Get free lifetime access to LaunchFrame [here](https://launchframe.dev/#beta-signup). Limited spots available.
 
 ---
 
