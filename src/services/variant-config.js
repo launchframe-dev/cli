@@ -60,11 +60,15 @@ const VARIANT_CONFIG = {
         }
       },
 
-      // B2B2C variant: Adds regular_user support (for single-tenant only)
+      // B2B2C variant: Adds regular_user support with separate customer auth
       'b2b2c': {
         // Complete files to copy
         files: [
-          'src/modules/users/user-business.entity.ts',  // Business-to-user linking entity
+          'src/modules/users/user-business.entity.ts',           // Business-to-user linking entity
+          'src/modules/auth/auth-customer.ts',                   // Customer auth config (regular_user, customer_ cookie)
+          'src/modules/auth/better-auth-customer.controller.ts', // Customer auth controller (/api/auth/customer)
+          'src/modules/auth/auth.module.ts',                     // Auth module with customer controller
+          'src/modules/auth/better-auth.guard.ts',               // Guard handling both auth instances
         ],
 
         // Code sections to insert
@@ -310,6 +314,14 @@ const VARIANT_CONFIG = {
           'src/store/useProjectStore.ts'          // Project state
         ],
         sections: {}
+      },
+
+      'b2b2c': {
+        // B2B2C uses separate auth endpoint for customer sessions
+        files: [
+          'src/lib/auth-client.ts'                // Auth client with /api/auth/customer basePath
+        ],
+        sections: {}
       }
     },
 
@@ -393,6 +405,11 @@ function resolveVariantChoices(backendChoices) {
   // Special case: admin-portal inherits BOTH tenancy and userModel
   if (choices['admin-portal']) {
     choices['admin-portal'].userModel = backendChoices.userModel;
+  }
+
+  // Special case: customers-portal inherits BOTH tenancy and userModel
+  if (choices['customers-portal']) {
+    choices['customers-portal'].userModel = backendChoices.userModel;
   }
 
   // Special case: infrastructure needs BOTH tenancy and userModel for proper variant resolution
