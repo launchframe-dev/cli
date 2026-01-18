@@ -205,6 +205,7 @@ async function waitlistDeploy() {
     verifySpinner.succeed('Services verified');
     console.log(chalk.gray('\n' + psOutput));
   } catch (error) {
+    console.error(chalk.yellow(`\n⚠️  Error: ${error.message}\n`));
     verifySpinner.warn('Could not verify services');
   }
 

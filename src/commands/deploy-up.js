@@ -105,7 +105,7 @@ async function deployUp() {
   const verifySpinner = ora('Checking service status...').start();
 
   try {
-    const { stdout: psOutput} = await execAsync(
+    const { stdout: psOutput } = await execAsync(
       `ssh ${vpsUser}@${vpsHost} "cd ${vpsAppFolder}/infrastructure && docker-compose -f docker-compose.yml ps"`,
       { timeout: 30000 }
     );
@@ -114,6 +114,7 @@ async function deployUp() {
 
     console.log(chalk.gray('\n' + psOutput));
   } catch (error) {
+    console.error(chalk.red(`\n❌ Error: ${error.message}\n`));
     verifySpinner.warn('Could not verify services');
   }
 
