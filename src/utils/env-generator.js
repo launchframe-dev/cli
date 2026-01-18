@@ -25,7 +25,7 @@ async function generateEnvFile(projectRoot, answers) {
 
   // Generate secure secrets
   const secrets = {
-    JWT_SECRET: generateSecret(32),
+    BETTER_AUTH_SECRET: generateSecret(32),
     DB_PASSWORD: generateSecret(24),
     BULL_ADMIN_TOKEN: generateSecret(24)
   };
@@ -39,7 +39,7 @@ async function generateEnvFile(projectRoot, answers) {
 
     // Replace placeholder passwords with generated secrets
     'your_secure_postgres_password': secrets.DB_PASSWORD,
-    'your_jwt_secret_key_change_this_in_production': secrets.JWT_SECRET,
+    'your_better_auth_secret_minimum_32_chars': secrets.BETTER_AUTH_SECRET,
     'your_bull_admin_token': secrets.BULL_ADMIN_TOKEN
   };
 

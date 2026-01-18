@@ -71,7 +71,7 @@ async function deploySetEnv() {
   // Generate secure defaults
   const dbPassword = generateSecret(24);
   const redisPassword = generateSecret(24);
-  const jwtSecret = generateSecret(32);
+  const betterAuthSecret = generateSecret(32);
   const bullAdminToken = generateSecret(32);
 
   const answers = await inquirer.prompt([
@@ -91,9 +91,9 @@ async function deploySetEnv() {
     },
     {
       type: 'password',
-      name: 'jwtSecret',
-      message: 'JWT secret:',
-      default: jwtSecret,
+      name: 'betterAuthSecret',
+      message: 'Better Auth secret (min 32 chars):',
+      default: betterAuthSecret,
       mask: '*'
     },
     {
@@ -143,7 +143,7 @@ async function deploySetEnv() {
 
   replacements['DB_PASSWORD'] = answers.dbPassword;
   replacements['REDIS_PASSWORD'] = answers.redisPassword;
-  replacements['JWT_SECRET'] = answers.jwtSecret;
+  replacements['BETTER_AUTH_SECRET'] = answers.betterAuthSecret;
   replacements['BULL_ADMIN_TOKEN'] = answers.bullAdminToken;
   replacements['RESEND_API_KEY'] = answers.resendApiKey || 're_your_resend_api_key';
   replacements['POLAR_ACCESS_TOKEN'] = answers.polarAccessToken || 'polar_oat_your_token';
