@@ -24,8 +24,6 @@ const VARIANT_CONFIG = {
           'src/modules/domain/ai/services/project-config.service.ts', // Project config service
           'src/guards/project-ownership.guard.ts', // Project ownership guard (header-based)
           'src/guards/project-param.guard.ts',     // Project param guard (route-based)
-          'src/modules/auth/auth.service.ts',      // Auth service with multi-tenant support
-          'src/modules/auth/auth.controller.ts',   // Auth controller with multi-tenant support
           'src/modules/users/users.service.ts',    // Users service with multi-tenant support
           'src/modules/users/users.controller.ts', // Users controller with multi-tenant support
           'src/modules/users/create-user.dto.ts'   // CreateUserDto with businessId
@@ -81,6 +79,9 @@ const VARIANT_CONFIG = {
           'src/modules/users/users.module.ts': [
             'B2B2C_IMPORTS',           // Add UserBusiness import
             'B2B2C_ENTITIES'           // Add UserBusiness to TypeORM
+          ],
+          'src/database/migrations/1764300000001-CreateSessionsTable.ts': [
+            'B2B2C_TENANT_COLUMN'      // Add tenant_id column for session scoping
           ]
         }
       },
@@ -130,8 +131,7 @@ const VARIANT_CONFIG = {
         // Complete files to copy (has both multi-tenant and B2B2C features)
         files: [
           'src/modules/users/user-business.entity.ts',         // Business-to-user linking entity
-          'src/modules/auth/auth.service.ts',                  // Combined auth service
-          'src/modules/auth/auth.controller.ts',               // Combined auth controller
+          'src/modules/auth/auth.ts',                          // Combined Better Auth config
           'src/modules/users/users.service.ts',                // Combined users service
           'src/modules/users/users.controller.ts',             // Combined users controller
           'src/modules/domain/projects/projects.module.ts'     // Projects module with UserBusiness
