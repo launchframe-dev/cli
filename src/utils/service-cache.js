@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const os = require('os');
 const { execSync } = require('child_process');
 const chalk = require('chalk');
+const logger = require('./logger');
 
 const SERVICES_REPO = 'git@github.com:launchframe-dev/services.git';
 const BRANCH = 'main';
@@ -38,30 +39,26 @@ async function cacheExists() {
 async function initializeCache() {
   const cacheDir = getCacheDir();
 
-  console.log(chalk.blue('🔄 Initializing services cache...'));
+  logger.detail('Initializing services cache...');
 
   try {
-    // Ensure parent directory exists
     await fs.ensureDir(path.dirname(cacheDir));
 
-    // Sparse clone (only root files, no services)
     execSync(
       `git clone --sparse --depth 1 --branch ${BRANCH} ${SERVICES_REPO} "${cacheDir}"`,
       {
-        stdio: 'pipe', // Hide output
-        timeout: 60000 // 1 minute timeout
+        stdio: 'pipe',
+        timeout: 60000
       }
     );
 
-    // Configure sparse checkout (starts with empty set)
     execSync('git sparse-checkout init --cone', {
       cwd: cacheDir,
       stdio: 'pipe'
     });
 
-    console.log(chalk.green('✓ Cache initialized'));
+    logger.detail('Cache initialized');
   } catch (error) {
-    // Clean up partial clone on failure
     await fs.remove(cacheDir);
     throw new Error(`Failed to initialize cache: ${error.message}`);
   }
@@ -75,16 +72,16 @@ async function initializeCache() {
 async function updateCache() {
   const cacheDir = getCacheDir();
 
-  console.log(chalk.blue('🔄 Updating service cache...'));
+  logger.detail('Updating service cache...');
 
   try {
     execSync('git pull origin main', {
       cwd: cacheDir,
       stdio: 'pipe',
-      timeout: 30000 // 30 seconds
+      timeout: 30000
     });
 
-    console.log(chalk.green('✓ Cache updated'));
+    logger.detail('Cache updated');
   } catch (error) {
     throw new Error(`Failed to update cache: ${error.message}`);
   }
@@ -98,10 +95,9 @@ async function updateCache() {
 async function expandServices(serviceNames) {
   const cacheDir = getCacheDir();
 
-  console.log(chalk.blue(`📦 Loading services: ${serviceNames.join(', ')}...`));
+  logger.detail(`Loading services: ${serviceNames.join(', ')}...`);
 
   try {
-    // Get current sparse checkout list
     let currentServices = [];
     try {
       const output = execSync('git sparse-checkout list', {
@@ -114,17 +110,15 @@ async function expandServices(serviceNames) {
       // No services yet, that's fine
     }
 
-    // Add new services to the list
     const allServices = [...new Set([...currentServices, ...serviceNames])];
 
-    // Set sparse checkout to include all services
     execSync(`git sparse-checkout set ${allServices.join(' ')}`, {
       cwd: cacheDir,
       stdio: 'pipe',
-      timeout: 60000 // 1 minute (may need to download files)
+      timeout: 60000
     });
 
-    console.log(chalk.green('✓ Services loaded'));
+    logger.detail('Services loaded');
   } catch (error) {
     throw new Error(`Failed to expand services: ${error.message}`);
   }
@@ -158,7 +152,7 @@ async function clearCache() {
 
   if (await fs.pathExists(cacheDir)) {
     await fs.remove(cacheDir);
-    console.log(chalk.green('✓ Cache cleared'));
+    console.log(chalk.green('Cache cleared'));
   } else {
     console.log(chalk.gray('Cache is already empty'));
   }

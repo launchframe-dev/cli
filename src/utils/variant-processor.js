@@ -15,6 +15,7 @@ const { replaceVariables } = require('./variable-replacer');
 const { getVariantConfig, getVariantsToApply } = require('../services/variant-config');
 const fs = require('fs-extra');
 const path = require('path');
+const logger = require('./logger');
 
 /**
  * Process service with variant modifications
@@ -32,7 +33,7 @@ async function processServiceVariant(
   replacements,
   templateRoot
 ) {
-  console.log(`\n📦 Processing ${serviceName} with choices:`, variantChoices);
+  logger.detail(`Processing ${serviceName} with choices: ${JSON.stringify(variantChoices)}`, 2);
 
   const serviceConfig = getVariantConfig(serviceName);
   if (!serviceConfig) {
@@ -41,33 +42,33 @@ async function processServiceVariant(
 
   const basePath = path.join(templateRoot, serviceConfig.base);
 
-  // Step 1: Copy base template (minimal - B2B + single-tenant)
-  console.log(`  📁 Copying base template from ${serviceConfig.base}`);
+  // Copy base template
+  logger.detail(`Copying base template from ${serviceConfig.base}`, 2);
   await copyDirectory(basePath, destination, {
     exclude: ['node_modules', '.git', 'dist', '.env']
   });
 
-  // Step 2: Determine which variants to apply
+  // Determine which variants to apply
   const variantsToApply = getVariantsToApply(variantChoices);
 
   if (variantsToApply.length === 0) {
-    console.log(`  ✅ Using base template (no variants to apply)`);
+    logger.detail('Using base template (no variants)', 2);
   } else {
-    console.log(`  🔧 Applying variants: ${variantsToApply.join(', ')}`);
+    logger.detail(`Applying variants: ${variantsToApply.join(', ')}`, 2);
   }
 
-  // Step 3: Apply each variant
+  // Apply each variant
   for (const variantName of variantsToApply) {
     const variantConfig = serviceConfig.variants[variantName];
 
     if (!variantConfig) {
-      console.warn(`  ⚠️  No configuration found for variant: ${variantName}, skipping`);
+      logger.warn(`No configuration found for variant: ${variantName}, skipping`);
       continue;
     }
 
-    console.log(`\n  ✨ Applying ${variantName} variant:`);
+    logger.detail(`Applying ${variantName} variant`, 2);
 
-    // Step 3a: Copy variant FILES
+    // Copy variant FILES
     await copyVariantFiles(
       variantName,
       variantConfig.files || [],
@@ -76,7 +77,7 @@ async function processServiceVariant(
       templateRoot
     );
 
-    // Step 3b: Insert variant SECTIONS
+    // Insert variant SECTIONS
     await insertVariantSections(
       variantName,
       variantConfig.sections || {},
@@ -86,15 +87,15 @@ async function processServiceVariant(
     );
   }
 
-  // Step 4: Clean up unused section markers
-  console.log(`\n  🧹 Cleaning up unused section markers`);
+  // Clean up unused section markers
+  logger.detail('Cleaning up unused section markers', 2);
   await cleanupSectionMarkers(serviceName, serviceConfig, variantsToApply, destination);
 
-  // Step 5: Replace template variables ({{PROJECT_NAME}}, etc.)
-  console.log(`\n  🔤 Replacing template variables`);
+  // Replace template variables
+  logger.detail('Replacing template variables', 2);
   await replaceVariables(destination, replacements);
 
-  console.log(`  ✅ ${serviceName} processing complete\n`);
+  logger.detail(`${serviceName} complete`, 2);
 }
 
 /**
@@ -110,7 +111,7 @@ async function cleanupSectionMarkers(serviceName, serviceConfig, appliedVariants
   const unappliedVariants = allVariants.filter(v => !appliedVariants.includes(v));
 
   if (unappliedVariants.length === 0) {
-    console.log(`    ✓ No unused section markers to clean`);
+    logger.detail('No unused section markers to clean', 3);
     return;
   }
 
@@ -146,8 +147,6 @@ async function cleanupSectionMarkers(serviceName, serviceConfig, appliedVariants
       // Remove each unused section marker (keep content, remove only marker comments)
       for (const sectionName of sectionNames) {
         // Try all comment formats (// for JS/TS, {/* */} for JSX, # for YAML/Shell)
-        // Capture: START marker, content, END marker - replace with just content
-        // Include leading whitespace before markers to prevent indentation issues
         const slashPattern = new RegExp(
           `^[ \\t]*\\/\\/ ${sectionName}_START\\n([\\s\\S]*?)^[ \\t]*\\/\\/ ${sectionName}_END\\n?`,
           'gm'
@@ -185,14 +184,14 @@ async function cleanupSectionMarkers(serviceName, serviceConfig, appliedVariants
         totalCleaned++;
       }
     } catch (error) {
-      console.warn(`    ⚠️  Could not clean markers in ${filePath}:`, error.message);
+      logger.warn(`Could not clean markers in ${filePath}: ${error.message}`);
     }
   }
 
   if (totalCleaned > 0) {
-    console.log(`    ✓ Cleaned up section markers in ${totalCleaned} file(s)`);
+    logger.detail(`Cleaned section markers in ${totalCleaned} file(s)`, 3);
   } else {
-    console.log(`    ✓ No unused section markers found`);
+    logger.detail('No unused section markers found', 3);
   }
 }
 
@@ -206,11 +205,11 @@ async function cleanupSectionMarkers(serviceName, serviceConfig, appliedVariants
  */
 async function copyVariantFiles(variantName, files, filesDir, destination, templateRoot) {
   if (!files || files.length === 0) {
-    console.log(`    📂 No files to copy for ${variantName}`);
+    logger.detail(`No files to copy for ${variantName}`, 3);
     return;
   }
 
-  console.log(`    📂 Copying ${files.length} file(s)/folder(s):`);
+  logger.detail(`Copying ${files.length} file(s) for ${variantName}`, 3);
 
   const variantFilesPath = path.join(templateRoot, filesDir, variantName);
 
@@ -219,22 +218,18 @@ async function copyVariantFiles(variantName, files, filesDir, destination, templ
     const destPath = path.join(destination, filePath);
 
     try {
-      // Check if source exists
       if (!await fs.pathExists(sourcePath)) {
-        console.warn(`      ⚠️  Source not found: ${filePath}, skipping`);
+        logger.warn(`Source not found: ${filePath}, skipping`);
         continue;
       }
 
-      // Create parent directory if needed
       await fs.ensureDir(path.dirname(destPath));
-
-      // Copy file or directory
       await fs.copy(sourcePath, destPath, { overwrite: true });
 
       const isDir = (await fs.stat(sourcePath)).isDirectory();
-      console.log(`      ✓ Copied ${isDir ? 'folder' : 'file'}: ${filePath}`);
+      logger.detail(`Copied ${isDir ? 'folder' : 'file'}: ${filePath}`, 4);
     } catch (error) {
-      console.warn(`      ⚠️  Could not copy ${filePath}:`, error.message);
+      logger.warn(`Could not copy ${filePath}: ${error.message}`);
     }
   }
 }
@@ -249,45 +244,41 @@ async function copyVariantFiles(variantName, files, filesDir, destination, templ
  */
 async function insertVariantSections(variantName, sections, sectionsDir, destination, templateRoot) {
   if (!sections || Object.keys(sections).length === 0) {
-    console.log(`    ✏️  No sections to insert for ${variantName}`);
+    logger.detail(`No sections to insert for ${variantName}`, 3);
     return;
   }
 
   const sectionFiles = Object.keys(sections);
-  console.log(`    ✏️  Inserting sections into ${sectionFiles.length} file(s):`);
+  logger.detail(`Inserting sections into ${sectionFiles.length} file(s)`, 3);
 
   const variantSectionsPath = path.join(templateRoot, sectionsDir, variantName);
 
   for (const [filePath, sectionNames] of Object.entries(sections)) {
     const targetFilePath = path.join(destination, filePath);
 
-    // Check if target file exists
     if (!await fs.pathExists(targetFilePath)) {
-      console.warn(`      ⚠️  Target file not found: ${filePath}, skipping sections`);
+      logger.warn(`Target file not found: ${filePath}, skipping sections`);
       continue;
     }
 
-    console.log(`      📝 ${filePath}:`);
+    logger.detail(`Processing ${filePath}`, 4);
 
     for (const sectionName of sectionNames) {
       try {
-        // Read section content from file
         const fileName = path.basename(filePath);
         const sectionFileName = `${fileName}.${sectionName}`;
         const sectionFilePath = path.join(variantSectionsPath, sectionFileName);
 
         if (!await fs.pathExists(sectionFilePath)) {
-          console.warn(`        ⚠️  Section file not found: ${sectionFileName}, skipping`);
+          logger.warn(`Section file not found: ${sectionFileName}, skipping`);
           continue;
         }
 
         const sectionContent = await fs.readFile(sectionFilePath, 'utf-8');
-
-        // Insert section content into target file
         await replaceSection(targetFilePath, sectionName, sectionContent);
-        console.log(`        ✓ Inserted [${sectionName}]`);
+        logger.detail(`Inserted [${sectionName}]`, 5);
       } catch (error) {
-        console.warn(`        ⚠️  Could not insert section ${sectionName}:`, error.message);
+        logger.warn(`Could not insert section ${sectionName}: ${error.message}`);
       }
     }
   }

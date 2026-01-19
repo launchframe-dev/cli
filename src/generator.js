@@ -1,11 +1,13 @@
 const path = require('path');
 const fs = require('fs-extra');
 const { execSync } = require('child_process');
+const chalk = require('chalk');
 const { replaceVariables } = require('./utils/variable-replacer');
 const { copyDirectory } = require('./utils/file-ops');
 const { generateEnvFile } = require('./utils/env-generator');
 const { processServiceVariant } = require('./utils/variant-processor');
 const { resolveVariantChoices } = require('./services/variant-config');
+const logger = require('./utils/logger');
 
 /**
  * Initialize git repository in a service directory
@@ -14,13 +16,13 @@ const { resolveVariantChoices } = require('./services/variant-config');
  */
 function initGitRepo(servicePath, serviceName) {
   try {
-    console.log(`🔧 Initializing git repository for ${serviceName}...`);
+    logger.detail(`Initializing git repository for ${serviceName}`);
     execSync('git init', { cwd: servicePath, stdio: 'ignore' });
     execSync('git add .', { cwd: servicePath, stdio: 'ignore' });
     execSync('git commit -m "Initial commit"', { cwd: servicePath, stdio: 'ignore' });
-    console.log(`✅ Git repository initialized for ${serviceName}`);
+    logger.detail(`Git initialized: ${serviceName}`);
   } catch (error) {
-    console.warn(`⚠️  Could not initialize git repository for ${serviceName}: ${error.message}`);
+    logger.warn(`Could not initialize git for ${serviceName}: ${error.message}`);
   }
 }
 
@@ -34,12 +36,11 @@ async function generateProject(answers, variantChoices, templateRoot) {
   const { projectName } = answers;
 
   // Define source (template) and destination paths
-  // templateRoot is now passed as parameter (cache or local dev path)
-  const projectRoot = path.resolve(__dirname, '../..'); // For root-level files like .github, README.md
+  const projectRoot = path.resolve(__dirname, '../..'); // For root-level files
   const destinationRoot = path.resolve(process.cwd(), projectName);
 
-  console.log(`📁 Template source: ${templateRoot}`);
-  console.log(`📁 Destination: ${destinationRoot}\n`);
+  logger.detail(`Template source: ${templateRoot}`);
+  logger.detail(`Destination: ${destinationRoot}`);
 
   // Ensure destination directory exists
   await fs.ensureDir(destinationRoot);
@@ -60,8 +61,8 @@ async function generateProject(answers, variantChoices, templateRoot) {
   // Resolve variant choices for all services
   const allServiceVariants = resolveVariantChoices(variantChoices);
 
-  // Step 1: Process backend service with variants
-  console.log('🔧 Processing backend service...');
+  // Process backend
+  console.log(chalk.gray('  Processing backend...'));
   await processServiceVariant(
     'backend',
     allServiceVariants.backend,
@@ -71,11 +72,10 @@ async function generateProject(answers, variantChoices, templateRoot) {
   );
   initGitRepo(path.join(destinationRoot, 'backend'), 'backend');
 
-  // Step 2: Process admin-portal service with variants
-  // Note: admin-portal folder might not exist yet in templates, skip if missing
+  // Process admin-portal
   const adminPortalTemplatePath = path.join(templateRoot, 'admin-portal/base');
   if (await fs.pathExists(adminPortalTemplatePath)) {
-    console.log('🔧 Processing admin-portal service...');
+    console.log(chalk.gray('  Processing admin-portal...'));
     await processServiceVariant(
       'admin-portal',
       allServiceVariants['admin-portal'],
@@ -85,8 +85,8 @@ async function generateProject(answers, variantChoices, templateRoot) {
     );
     initGitRepo(path.join(destinationRoot, 'admin-portal'), 'admin-portal');
   } else {
-    // Fallback: Copy admin-portal directly without variants (for now)
-    console.log('📋 Copying admin-portal service (no variants yet)...');
+    // Fallback: Copy admin-portal directly without variants
+    console.log(chalk.gray('  Copying admin-portal...'));
     const adminPortalSource = path.join(templateRoot, 'admin-portal');
     if (await fs.pathExists(adminPortalSource)) {
       await copyDirectory(adminPortalSource, path.join(destinationRoot, 'admin-portal'));
@@ -95,12 +95,11 @@ async function generateProject(answers, variantChoices, templateRoot) {
     }
   }
 
-  // Step 3: Process customers-portal service (ONLY if B2B2C selected)
+  // Process customers-portal (only if B2B2C)
   if (variantChoices.userModel === 'b2b2c') {
-    // Note: customers-portal folder might not exist yet in templates, skip if missing
     const customersPortalTemplatePath = path.join(templateRoot, 'customers-portal/base');
     if (await fs.pathExists(customersPortalTemplatePath)) {
-      console.log('🔧 Processing customers-portal service...');
+      console.log(chalk.gray('  Processing customers-portal...'));
       await processServiceVariant(
         'customers-portal',
         allServiceVariants['customers-portal'],
@@ -110,8 +109,7 @@ async function generateProject(answers, variantChoices, templateRoot) {
       );
       initGitRepo(path.join(destinationRoot, 'customers-portal'), 'customers-portal');
     } else {
-      // Fallback: Copy customers-portal directly without variants (for now)
-      console.log('📋 Copying customers-portal service (B2B2C mode)...');
+      console.log(chalk.gray('  Copying customers-portal...'));
       const customersPortalSource = path.join(templateRoot, 'customers-portal');
       if (await fs.pathExists(customersPortalSource)) {
         await copyDirectory(customersPortalSource, path.join(destinationRoot, 'customers-portal'));
@@ -120,11 +118,11 @@ async function generateProject(answers, variantChoices, templateRoot) {
       }
     }
   } else {
-    console.log('📋 Skipping customers-portal (B2B mode - admin users only)');
+    logger.detail('Skipping customers-portal (B2B mode)');
   }
 
-  // Step 4: Process infrastructure with variants (docker-compose files conditionally include customers-portal)
-  console.log('🔧 Processing infrastructure...');
+  // Process infrastructure
+  console.log(chalk.gray('  Processing infrastructure...'));
   await processServiceVariant(
     'infrastructure',
     allServiceVariants.infrastructure,
@@ -134,7 +132,8 @@ async function generateProject(answers, variantChoices, templateRoot) {
   );
   initGitRepo(path.join(destinationRoot, 'infrastructure'), 'infrastructure');
 
-  console.log('📋 Copying website...');
+  // Process website
+  console.log(chalk.gray('  Processing website...'));
   await copyDirectory(
     path.join(templateRoot, 'website'),
     path.join(destinationRoot, 'website')
@@ -142,14 +141,9 @@ async function generateProject(answers, variantChoices, templateRoot) {
   await replaceVariables(path.join(destinationRoot, 'website'), variables);
   initGitRepo(path.join(destinationRoot, 'website'), 'website');
 
-  // Step 5: Copy additional files (from project root, not services/)
-  console.log('📋 Copying additional files...');
-  const additionalFiles = [
-    '.github',
-    'README.md',
-    '.gitignore',
-    'LICENSE'
-  ];
+  // Copy additional files
+  logger.detail('Copying additional files...');
+  const additionalFiles = ['.github', 'README.md', '.gitignore', 'LICENSE'];
 
   for (const file of additionalFiles) {
     const sourcePath = path.join(projectRoot, file);
@@ -166,16 +160,15 @@ async function generateProject(answers, variantChoices, templateRoot) {
     }
   }
 
-  // Step 6: Generate .env file with localhost defaults
-  console.log('\n🔐 Generating .env file with secure secrets...');
+  // Generate .env file
+  console.log(chalk.gray('  Generating environment file...'));
   const { envPath } = await generateEnvFile(destinationRoot, answers);
-  console.log(`✅ Environment file created: ${envPath}`);
+  logger.detail(`Environment file: ${envPath}`);
 
-  // Step 7: Create .launchframe marker file with variant metadata
-  console.log('📝 Creating LaunchFrame marker file...');
+  // Create .launchframe marker file
+  logger.detail('Creating project marker file...');
   const markerPath = path.join(destinationRoot, '.launchframe');
 
-  // Determine which services were installed
   const installedServices = ['backend', 'admin-portal', 'infrastructure', 'website'];
   if (variantChoices.userModel === 'b2b2c') {
     installedServices.push('customers-portal');
@@ -188,12 +181,9 @@ async function generateProject(answers, variantChoices, templateRoot) {
     projectDisplayName: answers.projectDisplayName,
     deployConfigured: false,
     installedServices: installedServices,
-    // Store variant choices for future reference
     variants: variantChoices
   };
   await fs.writeJson(markerPath, markerContent, { spaces: 2 });
-
-  console.log('✅ Base project generated with variants applied');
 }
 
 module.exports = { generateProject };

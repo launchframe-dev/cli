@@ -2,6 +2,7 @@
 
 const chalk = require('chalk');
 const { isLaunchFrameProject } = require('./utils/project-helpers');
+const logger = require('./utils/logger');
 
 // Import commands
 const { init } = require('./commands/init');
@@ -64,6 +65,11 @@ function parseFlags(args) {
 async function main() {
   const inProject = isLaunchFrameProject();
   const flags = parseFlags(args);
+
+  // Set verbose mode globally
+  if (flags.verbose || flags.v) {
+    logger.setVerbose(true);
+  }
 
   // No command provided
   if (!command) {
@@ -156,7 +162,7 @@ async function main() {
       help();
       break;
     default:
-      console.error(chalk.red(`\n❌ Unknown command: ${command}\n`));
+      console.error(chalk.red(`\nUnknown command: ${command}\n`));
       help();
       process.exit(1);
   }

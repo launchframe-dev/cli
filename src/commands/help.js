@@ -7,9 +7,11 @@ const { isLaunchFrameProject, isWaitlistInstalled } = require('../utils/project-
 function help() {
   const inProject = isLaunchFrameProject();
 
-  console.log(chalk.blue.bold('\n🚀 LaunchFrame CLI\n'));
+  console.log(chalk.blue.bold('\nLaunchFrame CLI\n'));
   console.log(chalk.white('Usage:'));
-  console.log(chalk.gray('  launchframe [command]\n'));
+  console.log(chalk.gray('  launchframe [command] [options]\n'));
+  console.log(chalk.white('Global options:'));
+  console.log(chalk.gray('  --verbose, -v           Show detailed output\n'));
 
   if (inProject) {
     console.log(chalk.white('Deployment commands:'));
@@ -83,6 +85,8 @@ function help() {
     console.log(chalk.gray('  launchframe init\n'));
     console.log(chalk.gray('  # Non-interactive mode'));
     console.log(chalk.gray('  launchframe init --project-name my-saas --tenancy single --user-model b2b\n'));
+    console.log(chalk.gray('  # With verbose output'));
+    console.log(chalk.gray('  launchframe init --verbose\n'));
   }
 }
 
