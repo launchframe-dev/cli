@@ -10,6 +10,7 @@ const { deployConfigure } = require('./commands/deploy-configure');
 const { deploySetEnv } = require('./commands/deploy-set-env');
 const { deployInit } = require('./commands/deploy-init');
 const { deployUp } = require('./commands/deploy-up');
+const { deployBuild } = require('./commands/deploy-build');
 const { waitlistDeploy } = require('./commands/waitlist-deploy');
 const { waitlistUp } = require('./commands/waitlist-up');
 const { waitlistDown } = require('./commands/waitlist-down');
@@ -97,6 +98,9 @@ async function main() {
       break;
     case 'deploy:up':
       await deployUp();
+      break;
+    case 'deploy:build':
+      await deployBuild(args[1]); // Optional service name
       break;
     case 'waitlist:deploy':
       await waitlistDeploy();

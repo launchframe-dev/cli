@@ -254,6 +254,7 @@ async function buildWaitlistImage(projectRoot, projectName, githubOrg) {
 module.exports = {
   checkDockerRunning,
   loginToGHCR,
+  buildAndPushImage,
   buildFullAppImages,
   buildWaitlistImage
 };

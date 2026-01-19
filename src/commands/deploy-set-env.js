@@ -164,6 +164,7 @@ async function deploySetEnv() {
   if (config.deployment?.primaryDomain) {
     const domain = config.deployment.primaryDomain;
     const urlReplacements = {
+      'PRIMARY_DOMAIN': domain,
       'API_BASE_URL': `https://api.${domain}`,
       'ADMIN_BASE_URL': `https://admin.${domain}`,
       'FRONTEND_BASE_URL': `https://app.${domain}`,
