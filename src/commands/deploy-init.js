@@ -1,6 +1,5 @@
 const chalk = require('chalk');
 const path = require('path');
-const fs = require('fs-extra');
 const ora = require('ora');
 const { requireProject, getProjectConfig } = require('../utils/project-helpers');
 const { validateEnvProd } = require('../utils/env-validator');
@@ -9,8 +8,10 @@ const {
   checkSSHKeys,
   executeSSH,
   copyFileToVPS,
-  copyDirectoryToVPS
+  copyDirectoryToVPS,
+  pullImagesOnVPS
 } = require('../utils/ssh-helper');
+const { buildAndPushWorkflow } = require('../utils/docker-helper');
 
 /**
  * Initial VPS setup - copy infrastructure files and configure environment
@@ -30,8 +31,8 @@ async function deployInit() {
     process.exit(1);
   }
 
-  const { vpsHost, vpsUser, vpsAppFolder, githubOrg } = config.deployment;
-  const { projectName } = config;
+  const { vpsHost, vpsUser, vpsAppFolder, githubOrg, ghcrToken } = config.deployment;
+  const { projectName, installedServices } = config;
   const projectRoot = process.cwd();
   const envProdPath = path.join(projectRoot, 'infrastructure', '.env.prod');
 
@@ -86,42 +87,18 @@ async function deployInit() {
   spinner.succeed('Connected to VPS successfully');
   console.log();
 
-  // Step 3.5: Build and push Docker images
-  console.log(chalk.yellow('🐳 Step 3.5: Building Docker images locally...\n'));
-
-  // Check if Docker is running
-  const {
-    checkDockerRunning,
-    loginToGHCR,
-    buildFullAppImages
-  } = require('../utils/docker-helper');
-
-  const dockerRunning = await checkDockerRunning();
-  if (!dockerRunning) {
-    console.log(chalk.red('❌ Docker is not running\n'));
-    console.log(chalk.gray('Please start Docker Desktop and try again.\n'));
-    console.log(chalk.gray('Docker is required to build production images for deployment.\n'));
-    process.exit(1);
-  }
-
-  // Validate GHCR token is configured
-  const { ghcrToken } = config.deployment || {};
-  if (!ghcrToken) {
-    console.log(chalk.red('❌ GHCR token not configured\n'));
-    console.log(chalk.gray('Run this command first:'));
-    console.log(chalk.white('  launchframe deploy:configure\n'));
-    process.exit(1);
-  }
+  // Step 4: Build and push Docker images
+  console.log(chalk.yellow('🐳 Step 4: Building Docker images locally...\n'));
 
   try {
-    // Login to GHCR
-    await loginToGHCR(githubOrg, ghcrToken);
-
-    // Build full-app images (only for installed services)
-    const installedServices = config.installedServices || ['backend', 'admin-portal', 'website'];
-    await buildFullAppImages(projectRoot, projectName, githubOrg, envProdPath, installedServices);
-
-    console.log(chalk.green.bold('\n✅ All images built and pushed to GHCR!\n'));
+    await buildAndPushWorkflow({
+      projectRoot,
+      projectName,
+      githubOrg,
+      ghcrToken,
+      envProdPath,
+      installedServices: installedServices || ['backend', 'admin-portal', 'website']
+    });
   } catch (error) {
     console.log(chalk.red('\n❌ Failed to build Docker images\n'));
     console.log(chalk.gray('Error:'), error.message, '\n');
@@ -135,16 +112,15 @@ async function deployInit() {
     process.exit(1);
   }
 
-
-  // Step 4: Create app directory and copy infrastructure files
-  console.log(chalk.yellow('📦 Step 4: Setting up application on VPS...\n'));
+  // Step 5: Create app directory and copy infrastructure files
+  console.log(chalk.yellow('📦 Step 5: Setting up application on VPS...\n'));
 
   const setupSpinner = ora('Creating app directory...').start();
 
   try {
     // Create infrastructure directory on VPS
     await executeSSH(vpsUser, vpsHost, `mkdir -p ${vpsAppFolder}/infrastructure`);
-    
+
     setupSpinner.text = 'Copying infrastructure files to VPS...';
 
     // Copy entire infrastructure directory to VPS
@@ -205,8 +181,8 @@ async function deployInit() {
     // If error, waitlist probably not running - continue
   }
 
-  // Step 5: Copy .env.prod to VPS (overwrites .env copied from infrastructure/)
-  console.log(chalk.yellow('\n📄 Step 5: Configuring production environment...\n'));
+  // Step 6: Copy .env.prod to VPS (overwrites .env copied from infrastructure/)
+  console.log(chalk.yellow('\n📄 Step 6: Configuring production environment...\n'));
 
   const envSpinner = ora('Copying .env.prod to VPS...').start();
 
@@ -220,27 +196,18 @@ async function deployInit() {
     process.exit(1);
   }
 
-  // Step 6: Pull Docker images
-  console.log(chalk.yellow('\n🐳 Step 6: Pulling Docker images...\n'));
+  // Step 7: Pull Docker images
+  console.log(chalk.yellow('\n🐳 Step 7: Pulling Docker images on VPS...\n'));
   console.log(chalk.gray('This may take several minutes...\n'));
 
-  const dockerSpinner = ora('Pulling Docker images...').start();
-
   try {
-    await executeSSH(
-      vpsUser,
-      vpsHost,
-      `cd ${vpsAppFolder}/infrastructure && docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull`,
-      { timeout: 600000 } // 10 minutes for image pull
-    );
-    dockerSpinner.succeed('Docker images pulled successfully');
+    await pullImagesOnVPS(vpsUser, vpsHost, vpsAppFolder);
   } catch (error) {
-    dockerSpinner.fail('Failed to pull Docker images');
     console.log(chalk.yellow(`\n⚠️  Warning: ${error.message}\n`));
     console.log(chalk.gray('This might mean Docker is not installed on the VPS.'));
     console.log(chalk.gray('Please install Docker and Docker Compose:\n'));
     console.log(chalk.white('  curl -fsSL https://get.docker.com | sh'));
-    console.log(chalk.white('  sudo usermod -aG docker ${vpsUser}\n'));
+    console.log(chalk.white(`  sudo usermod -aG docker ${vpsUser}\n`));
     process.exit(1);
   }
 

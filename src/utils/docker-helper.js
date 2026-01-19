@@ -251,10 +251,77 @@ async function buildWaitlistImage(projectRoot, projectName, githubOrg) {
   }
 }
 
+/**
+ * Complete build and push workflow - checks Docker, logs in to GHCR, builds and pushes images
+ * @param {Object} options - Workflow options
+ * @param {string} options.projectRoot - Project root directory
+ * @param {string} options.projectName - Project name
+ * @param {string} options.githubOrg - GitHub organization/username
+ * @param {string} options.ghcrToken - GitHub Container Registry token
+ * @param {string} options.envProdPath - Path to .env.prod file
+ * @param {string[]} options.installedServices - List of installed services
+ * @param {string} [options.serviceName] - Optional specific service to build (if not provided, builds all)
+ * @returns {Promise<void>}
+ */
+async function buildAndPushWorkflow(options) {
+  const {
+    projectRoot,
+    projectName,
+    githubOrg,
+    ghcrToken,
+    envProdPath,
+    installedServices,
+    serviceName
+  } = options;
+
+  // Step 1: Check Docker is running
+  const dockerSpinner = ora('Checking Docker...').start();
+
+  const dockerRunning = await checkDockerRunning();
+  if (!dockerRunning) {
+    dockerSpinner.fail('Docker is not running');
+    throw new Error('Docker is not running. Please start Docker and try again.');
+  }
+
+  dockerSpinner.succeed('Docker is running');
+
+  // Step 2: Login to GHCR
+  if (!ghcrToken) {
+    throw new Error('GHCR token not found. Run deploy:configure to set up your GitHub token.');
+  }
+
+  await loginToGHCR(githubOrg, ghcrToken);
+
+  // Step 3: Build and push images
+  console.log(chalk.yellow('\n📦 Building and pushing images...\n'));
+
+  if (serviceName) {
+    // Build specific service
+    if (!installedServices.includes(serviceName)) {
+      throw new Error(`Service "${serviceName}" not found in installed services. Available: ${installedServices.join(', ')}`);
+    }
+
+    const registry = `ghcr.io/${githubOrg}`;
+    const path = require('path');
+    await buildAndPushImage(
+      serviceName,
+      path.join(projectRoot, serviceName),
+      registry,
+      projectName
+    );
+    console.log(chalk.green.bold(`\n✅ ${serviceName} built and pushed to GHCR!\n`));
+  } else {
+    // Build all services
+    await buildFullAppImages(projectRoot, projectName, githubOrg, envProdPath, installedServices);
+    console.log(chalk.green.bold('\n✅ All images built and pushed to GHCR!\n'));
+  }
+}
+
 module.exports = {
   checkDockerRunning,
   loginToGHCR,
   buildAndPushImage,
   buildFullAppImages,
-  buildWaitlistImage
+  buildWaitlistImage,
+  buildAndPushWorkflow
 };

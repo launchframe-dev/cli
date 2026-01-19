@@ -209,6 +209,54 @@ function showDeployKeyInstructions(vpsUser, vpsHost, githubOrg, projectName) {
   console.log(chalk.gray('   launchframe deploy:init\n'));
 }
 
+/**
+ * Pull Docker images on VPS
+ * @param {string} vpsUser - SSH username
+ * @param {string} vpsHost - VPS hostname or IP
+ * @param {string} vpsAppFolder - App folder path on VPS
+ * @returns {Promise<void>}
+ */
+async function pullImagesOnVPS(vpsUser, vpsHost, vpsAppFolder) {
+  const ora = require('ora');
+
+  const spinner = ora('Pulling images on VPS...').start();
+
+  try {
+    await execAsync(
+      `ssh ${vpsUser}@${vpsHost} "cd ${vpsAppFolder}/infrastructure && docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull"`,
+      { timeout: 600000 } // 10 minutes
+    );
+    spinner.succeed('Images pulled on VPS');
+  } catch (error) {
+    spinner.fail('Failed to pull images on VPS');
+    throw new Error(`Failed to pull images: ${error.message}`);
+  }
+}
+
+/**
+ * Restart services on VPS
+ * @param {string} vpsUser - SSH username
+ * @param {string} vpsHost - VPS hostname or IP
+ * @param {string} vpsAppFolder - App folder path on VPS
+ * @returns {Promise<void>}
+ */
+async function restartServicesOnVPS(vpsUser, vpsHost, vpsAppFolder) {
+  const ora = require('ora');
+
+  const spinner = ora('Restarting services...').start();
+
+  try {
+    await execAsync(
+      `ssh ${vpsUser}@${vpsHost} "cd ${vpsAppFolder}/infrastructure && docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d"`,
+      { timeout: 300000 } // 5 minutes
+    );
+    spinner.succeed('Services restarted');
+  } catch (error) {
+    spinner.fail('Failed to restart services');
+    throw new Error(`Failed to restart services: ${error.message}`);
+  }
+}
+
 module.exports = {
   testSSHConnection,
   checkSSHKeys,
@@ -216,5 +264,7 @@ module.exports = {
   copyFileToVPS,
   copyDirectoryToVPS,
   checkRepoPrivacy,
-  showDeployKeyInstructions
+  showDeployKeyInstructions,
+  pullImagesOnVPS,
+  restartServicesOnVPS
 };
