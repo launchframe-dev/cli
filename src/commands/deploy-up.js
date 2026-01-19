@@ -106,7 +106,7 @@ async function deployUp() {
 
   try {
     const { stdout: psOutput } = await execAsync(
-      `ssh ${vpsUser}@${vpsHost} "cd ${vpsAppFolder}/infrastructure && docker-compose -f docker-compose.yml ps"`,
+      `ssh ${vpsUser}@${vpsHost} "cd ${vpsAppFolder}/infrastructure && docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps"`,
       { timeout: 30000 }
     );
 
@@ -139,7 +139,7 @@ async function deployUp() {
   console.log(chalk.gray('   Just push to GitHub - CI/CD will handle deployment automatically!\n'));
 
   console.log(chalk.white('3. Monitor services:'));
-  console.log(chalk.gray(`   Run: ssh ${vpsUser}@${vpsHost} "cd ${vpsAppFolder}/infrastructure && docker-compose logs -f"\n`));
+  console.log(chalk.gray(`   Run: ssh ${vpsUser}@${vpsHost} "cd ${vpsAppFolder}/infrastructure && docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f"\n`));
 }
 
 module.exports = { deployUp };
