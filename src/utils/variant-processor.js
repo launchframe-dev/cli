@@ -62,7 +62,9 @@ async function processServiceVariant(
     const variantConfig = serviceConfig.variants[variantName];
 
     if (!variantConfig) {
-      logger.warn(`No configuration found for variant: ${variantName}, skipping`);
+      // Silently skip - not every service needs every variant combination
+      // (e.g., b2b2c_multi-tenant may only apply to backend, not admin-portal)
+      logger.detail(`Skipping ${variantName} (not applicable to this service)`, 3);
       continue;
     }
 

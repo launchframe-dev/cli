@@ -21,7 +21,6 @@ const VARIANT_CONFIG = {
         // Complete files/folders to copy
         files: [
           'src/modules/domain/projects',           // Entire projects module
-          'src/modules/domain/ai/services/project-config.service.ts', // Project config service
           'src/guards/project-ownership.guard.ts', // Project ownership guard (header-based)
           'src/guards/project-param.guard.ts',     // Project param guard (route-based)
           'src/modules/users/users.service.ts',    // Users service with multi-tenant support
@@ -30,13 +29,8 @@ const VARIANT_CONFIG = {
         ],
 
         // Code sections to insert into base template files
+        // Note: main.ts uses PRIMARY_DOMAIN env var for dynamic CORS - no sections needed
         sections: {
-          'src/main.ts': [
-            'PROJECT_IMPORTS',              // Add project-related imports
-            'PROJECT_CUSTOM_DOMAINS',       // Add custom domains query
-            'PROJECT_CUSTOM_DOMAINS_CORS',  // Add custom domains to CORS
-            'PROJECT_GUARD'                 // Add ProjectOwnershipGuard registration
-          ],
           'src/modules/app/app.module.ts': [
             'PROJECTS_MODULE_IMPORT',       // Add ProjectsModule import
             'PROJECTS_MODULE'               // Add ProjectsModule to imports array
