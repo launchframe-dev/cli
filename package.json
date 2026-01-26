@@ -1,6 +1,6 @@
 {
   "name": "@launchframe/cli",
-  "version": "1.0.0-beta.18",
+  "version": "1.0.0-beta.19",
   "description": "Production-ready B2B SaaS boilerplate with subscriptions, credits, and multi-tenancy",
   "main": "src/index.js",
   "bin": {
