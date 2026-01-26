@@ -59,13 +59,15 @@ async function validateEnvProd(envProdPath) {
 }
 
 /**
- * Generate a secure random string for secrets
+ * Generate a secure random string for secrets (URL-safe)
  * @param {number} length - Length of string to generate
  * @returns {string}
  */
 function generateSecret(length = 32) {
   const crypto = require('crypto');
-  return crypto.randomBytes(length).toString('base64').slice(0, length);
+  // Use hex encoding to avoid URL-unsafe characters (+, /, =)
+  // Hex produces 2 chars per byte, so divide by 2
+  return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
 }
 
 module.exports = {

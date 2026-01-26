@@ -163,12 +163,21 @@ async function deploySetEnv() {
   // Update production URLs based on deployment config
   if (config.deployment?.primaryDomain) {
     const domain = config.deployment.primaryDomain;
+    const adminEmail = config.deployment.adminEmail || `admin@${domain}`;
+
+    // First, replace all {{PRIMARY_DOMAIN}} and {{ADMIN_EMAIL}} placeholders globally
+    envContent = envContent.split('{{PRIMARY_DOMAIN}}').join(domain);
+    envContent = envContent.split('{{ADMIN_EMAIL}}').join(adminEmail);
+
+    // Then update specific URL variables for production
     const urlReplacements = {
       'PRIMARY_DOMAIN': domain,
+      'NODE_ENV': 'production',
       'API_BASE_URL': `https://api.${domain}`,
       'ADMIN_BASE_URL': `https://admin.${domain}`,
-      'FRONTEND_BASE_URL': `https://app.${domain}`,
-      'WEBSITE_BASE_URL': `https://${domain}`
+      'FRONTEND_BASE_URL': `https://${domain}`,
+      'WEBSITE_BASE_URL': `https://www.${domain}`,
+      'GOOGLE_REDIRECT_URI': `https://api.${domain}/auth/google/callback`
     };
 
     for (const [key, value] of Object.entries(urlReplacements)) {

@@ -31,11 +31,12 @@ async function generateEnvFile(projectRoot, answers) {
   };
 
   // Create variable mappings
+  // Note: PRIMARY_DOMAIN and ADMIN_EMAIL are NOT replaced here - they stay as placeholders
+  // until deploy:configure and deploy:set-env are run
   const variables = {
     '{{PROJECT_NAME}}': answers.projectName,
     '{{PROJECT_NAME_UPPER}}': answers.projectNameUpper,
-    '{{PRIMARY_DOMAIN}}': answers.primaryDomain,
-    '{{ADMIN_EMAIL}}': answers.adminEmail,
+    '{{PROJECT_DISPLAY_NAME}}': answers.projectDisplayName,
 
     // Replace placeholder passwords with generated secrets
     'your_secure_postgres_password': secrets.DB_PASSWORD,
@@ -43,10 +44,12 @@ async function generateEnvFile(projectRoot, answers) {
     'your_bull_admin_token': secrets.BULL_ADMIN_TOKEN
   };
 
-  // Replace variables in template
+  // Replace variables in template (only those with defined values)
   let envContent = envTemplate;
   for (const [placeholder, value] of Object.entries(variables)) {
-    envContent = envContent.split(placeholder).join(value);
+    if (value !== undefined && value !== null) {
+      envContent = envContent.split(placeholder).join(value);
+    }
   }
 
   // Write .env file

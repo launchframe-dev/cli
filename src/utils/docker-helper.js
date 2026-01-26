@@ -159,7 +159,6 @@ async function buildFullAppImages(projectRoot, projectName, githubOrg, envFilePa
       `DOCS_URL=${envVars.DOCS_URL || ''}`,
       `CONTACT_EMAIL=${envVars.CONTACT_EMAIL || ''}`,
       `CTA_LINK=${envVars.CTA_LINK || ''}`,
-      `LIVE_DEMO_URL=${envVars.LIVE_DEMO_URL || ''}`,
       `MIXPANEL_PROJECT_TOKEN=${envVars.MIXPANEL_PROJECT_TOKEN || ''}`,
       `GOOGLE_ANALYTICS_ID=${envVars.GOOGLE_ANALYTICS_ID || ''}`
     ];
@@ -245,9 +244,47 @@ async function buildWaitlistImage(projectRoot, projectName, githubOrg) {
     });
 
     spinner.succeed(`waitlist built and pushed successfully`);
+
+    // Clean up local image after push
+    const cleanupSpinner = ora('Cleaning up local waitlist image...').start();
+    try {
+      await execAsync(`docker rmi ${imageName}`, { timeout: 30000 });
+      cleanupSpinner.succeed('Cleaned up local waitlist image');
+    } catch (error) {
+      cleanupSpinner.info('Could not remove local waitlist image (may be in use)');
+    }
   } catch (error) {
     spinner.fail(`Failed to build waitlist`);
     throw new Error(`Build failed for waitlist: ${error.message}`);
+  }
+}
+
+/**
+ * Clean up local Docker images after push
+ * @param {string} registry - Registry URL (e.g., 'ghcr.io/myorg')
+ * @param {string} projectName - Project name
+ * @param {string[]} services - List of services to clean up
+ * @returns {Promise<void>}
+ */
+async function cleanupLocalImages(registry, projectName, services) {
+  const spinner = ora('Cleaning up local Docker images...').start();
+
+  const imagesToRemove = services.map(service => `${registry}/${projectName}-${service}:latest`);
+  let removedCount = 0;
+
+  for (const imageName of imagesToRemove) {
+    try {
+      await execAsync(`docker rmi ${imageName}`, { timeout: 30000 });
+      removedCount++;
+    } catch (error) {
+      // Image might not exist or be in use, continue
+    }
+  }
+
+  if (removedCount > 0) {
+    spinner.succeed(`Cleaned up ${removedCount} local Docker image(s)`);
+  } else {
+    spinner.info('No local images to clean up');
   }
 }
 
@@ -295,24 +332,32 @@ async function buildAndPushWorkflow(options) {
   // Step 3: Build and push images
   console.log(chalk.yellow('\n📦 Building and pushing images...\n'));
 
+  const registry = `ghcr.io/${githubOrg}`;
+
   if (serviceName) {
     // Build specific service
     if (!installedServices.includes(serviceName)) {
       throw new Error(`Service "${serviceName}" not found in installed services. Available: ${installedServices.join(', ')}`);
     }
 
-    const registry = `ghcr.io/${githubOrg}`;
-    const path = require('path');
     await buildAndPushImage(
       serviceName,
       path.join(projectRoot, serviceName),
       registry,
       projectName
     );
+
+    // Clean up local image after push
+    await cleanupLocalImages(registry, projectName, [serviceName]);
+
     console.log(chalk.green.bold(`\n✅ ${serviceName} built and pushed to GHCR!\n`));
   } else {
     // Build all services
     await buildFullAppImages(projectRoot, projectName, githubOrg, envProdPath, installedServices);
+
+    // Clean up local images after push
+    await cleanupLocalImages(registry, projectName, installedServices);
+
     console.log(chalk.green.bold('\n✅ All images built and pushed to GHCR!\n'));
   }
 }
@@ -323,5 +368,6 @@ module.exports = {
   buildAndPushImage,
   buildFullAppImages,
   buildWaitlistImage,
-  buildAndPushWorkflow
+  buildAndPushWorkflow,
+  cleanupLocalImages
 };

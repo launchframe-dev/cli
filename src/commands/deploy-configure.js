@@ -59,8 +59,8 @@ async function deployConfigure() {
   console.log(chalk.yellow('\n⚙️  Updating configuration files...\n'));
 
   // Files that need template variable replacement
+  // Note: infrastructure/.env is NOT updated - it's for local development only
   const filesToUpdate = [
-    'infrastructure/.env',
     'infrastructure/.env.example',
     'infrastructure/docker-compose.yml',
     'infrastructure/docker-compose.dev.yml',
