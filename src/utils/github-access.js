@@ -38,26 +38,28 @@ async function checkGitHubAccess() {
 
 /**
  * Display message when user doesn't have access to services repository
- * Guides them to either purchase or setup SSH keys
+ * Guides them to either get beta access or setup SSH keys
  */
 function showAccessDeniedMessage() {
-  const purchaseUrl = 'https://buy.polar.sh/polar_cl_Zy4YqEwhoIEdUrAH8vHaWuZtwZuv306sYMnq118MbKi';
+  const betaUrl = 'https://launchframe.dev/';
   const docsUrl = 'https://docs.launchframe.dev/guide/quick-start#add-ssh-key-to-repo';
-  
+
   console.log(chalk.red('\n❌ Cannot access LaunchFrame services repository\n'));
-  
+
   console.log(chalk.white('This could mean:\n'));
-  console.log(chalk.gray('  1. You haven\'t purchased LaunchFrame yet'));
-  console.log(chalk.gray('  2. You purchased but haven\'t added your SSH key to the repo\n'));
-  
-  console.log(chalk.cyan('→ New customers:'));
-  console.log('  ' + chalk.blue.bold.underline(makeClickable('Purchase LaunchFrame', purchaseUrl)));
-  console.log('  ' + chalk.cyan(purchaseUrl + '\n'));
-  
-  console.log(chalk.cyan('→ Existing customers:'));
+  console.log(chalk.gray('  1. You don\'t have beta access yet'));
+  console.log(chalk.gray('  2. You have access but haven\'t added your SSH key to the repo\n'));
+
+  console.log(chalk.cyan('→ Get beta access:'));
+  console.log(chalk.white('  LaunchFrame is in open beta for 100 users.'));
+  console.log(chalk.white('  Get free lifetime access at:'));
+  console.log('  ' + chalk.blue.bold.underline(makeClickable('launchframe.dev', betaUrl)));
+  console.log('  ' + chalk.cyan(betaUrl + '\n'));
+
+  console.log(chalk.cyan('→ Already have access?'));
   console.log('  ' + chalk.blue.bold.underline(makeClickable('Setup SSH key (docs)', docsUrl)));
   console.log('  ' + chalk.cyan(docsUrl + '\n'));
-  
+
   console.log(chalk.gray('After setup, run: launchframe init\n'));
 }
 
