@@ -3,6 +3,7 @@
 const chalk = require('chalk');
 const { isLaunchFrameProject } = require('./utils/project-helpers');
 const logger = require('./utils/logger');
+const packageJson = require('../package.json');
 
 // Import commands
 const { init } = require('./commands/init');
@@ -70,6 +71,12 @@ async function main() {
   // Set verbose mode globally
   if (flags.verbose || flags.v) {
     logger.setVerbose(true);
+  }
+
+  // Handle version flag (can be used as command or flag)
+  if (command === '--version' || flags.version) {
+    console.log(packageJson.version);
+    process.exit(0);
   }
 
   // No command provided
