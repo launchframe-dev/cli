@@ -3,7 +3,6 @@
 const chalk = require('chalk');
 const { isLaunchFrameProject } = require('./utils/project-helpers');
 const logger = require('./utils/logger');
-const packageJson = require('../package.json');
 
 // Import commands
 const { init } = require('./commands/init');
@@ -70,6 +69,7 @@ async function main() {
 
   // Handle version flag (only as standalone command)
   if (command === '--version') {
+    const packageJson = require('../package.json');
     console.log(packageJson.version);
     process.exit(0);
   }
