@@ -68,15 +68,15 @@ async function main() {
   const inProject = isLaunchFrameProject();
   const flags = parseFlags(args);
 
-  // Set verbose mode globally
-  if (flags.verbose || flags.v) {
-    logger.setVerbose(true);
-  }
-
   // Handle version flag (can be used as command or flag)
   if (command === '--version' || flags.version) {
     console.log(packageJson.version);
     process.exit(0);
+  }
+
+  // Set verbose mode globally
+  if (flags.verbose || flags.v) {
+    logger.setVerbose(true);
   }
 
   // No command provided
