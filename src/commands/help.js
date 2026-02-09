@@ -11,7 +11,8 @@ function help() {
   console.log(chalk.white('Usage:'));
   console.log(chalk.gray('  launchframe [command] [options]\n'));
   console.log(chalk.white('Global options:'));
-  console.log(chalk.gray('  --verbose, -v           Show detailed output\n'));
+  console.log(chalk.gray('  --verbose, -v           Show detailed output'));
+  console.log(chalk.gray('  --version               Show version number\n'));
 
   if (inProject) {
     console.log(chalk.white('Deployment commands:'));

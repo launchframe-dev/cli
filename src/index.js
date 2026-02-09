@@ -67,6 +67,13 @@ async function main() {
   const inProject = isLaunchFrameProject();
   const flags = parseFlags(args);
 
+  // Handle version flag (only as standalone command)
+  if (command === '--version') {
+    const packageJson = require('../package.json');
+    console.log(packageJson.version);
+    process.exit(0);
+  }
+
   // Set verbose mode globally
   if (flags.verbose || flags.v) {
     logger.setVerbose(true);
