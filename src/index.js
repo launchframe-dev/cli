@@ -68,8 +68,8 @@ async function main() {
   const inProject = isLaunchFrameProject();
   const flags = parseFlags(args);
 
-  // Handle version flag (can be used as command or flag)
-  if (command === '--version' || flags.version) {
+  // Handle version flag (only as standalone command)
+  if (command === '--version') {
     console.log(packageJson.version);
     process.exit(0);
   }
