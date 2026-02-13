@@ -3,6 +3,7 @@
 const chalk = require('chalk');
 const { isLaunchFrameProject } = require('./utils/project-helpers');
 const logger = require('./utils/logger');
+const { initTelemetry, trackEvent, sanitize, setTelemetryEnabled, showTelemetryStatus } = require('./utils/telemetry');
 
 // Import commands
 const { init } = require('./commands/init');
@@ -64,6 +65,8 @@ function parseFlags(args) {
  * Main CLI router
  */
 async function main() {
+  initTelemetry();
+
   const inProject = isLaunchFrameProject();
   const flags = parseFlags(args);
 
@@ -167,6 +170,15 @@ async function main() {
     case 'cache:update':
       await cacheUpdate();
       break;
+    case 'telemetry':
+      if (flags.disable) {
+        setTelemetryEnabled(false);
+      } else if (flags.enable) {
+        setTelemetryEnabled(true);
+      } else {
+        showTelemetryStatus();
+      }
+      break;
     case 'help':
     case '--help':
     case '-h':
@@ -179,4 +191,18 @@ async function main() {
   }
 }
 
-main();
+main()
+  .then(() => {
+    if (command && command !== 'help' && command !== '--help' && command !== '-h' && command !== '--version') {
+      trackEvent('command_executed', { command, success: true });
+    }
+  })
+  .catch((error) => {
+    trackEvent('command_executed', {
+      command,
+      success: false,
+      error_message: sanitize(error.message)
+    });
+    console.error(chalk.red(error.message));
+    process.exit(1);
+  });

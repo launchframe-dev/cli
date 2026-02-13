@@ -7,6 +7,7 @@ const { checkGitHubAccess, showAccessDeniedMessage } = require('../utils/github-
 const { ensureCacheReady } = require('../utils/service-cache');
 const { isLaunchFrameProject } = require('../utils/project-helpers');
 const logger = require('../utils/logger');
+const { trackEvent } = require('../utils/telemetry');
 
 /**
  * Check if running in development mode (local) vs production (npm install)
@@ -134,6 +135,13 @@ async function init(options = {}) {
     // Generate project
     console.log(chalk.white('\nGenerating project...\n'));
     await generateProject(answers, variantChoices, templateRoot);
+
+    trackEvent('command_executed', {
+      command: 'init',
+      success: true,
+      tenancy: variantChoices.tenancy,
+      user_model: variantChoices.userModel
+    });
 
     console.log(chalk.green.bold('\nProject created successfully!\n'));
     console.log(chalk.white('Next steps:'));

@@ -49,6 +49,9 @@ function help() {
     console.log(chalk.gray('  cache:clear       Delete cache (re-download on next use)\n'));
     console.log(chalk.white('Other commands:'));
     console.log(chalk.gray('  doctor            Check project health and configuration'));
+    console.log(chalk.gray('  telemetry         Show telemetry status'));
+    console.log(chalk.gray('    --enable          Enable anonymous usage data collection'));
+    console.log(chalk.gray('    --disable         Disable anonymous usage data collection'));
     console.log(chalk.gray('  help              Show this help message\n'));
     console.log(chalk.white('Examples:'));
     console.log(chalk.gray('  # Deploy full app to production'));
@@ -78,6 +81,10 @@ function help() {
     console.log(chalk.gray('    --tenancy <single|multi>  Tenancy model (skips prompt)'));
     console.log(chalk.gray('    --user-model <b2b|b2b2c>  User model (skips prompt)'));
     console.log(chalk.gray('  help                        Show this help message\n'));
+    console.log(chalk.white('Telemetry:'));
+    console.log(chalk.gray('  telemetry                   Show telemetry status'));
+    console.log(chalk.gray('    --enable                  Enable anonymous usage data collection'));
+    console.log(chalk.gray('    --disable                 Disable anonymous usage data collection\n'));
     console.log(chalk.white('Cache Management:'));
     console.log(chalk.gray('  cache:info        Show cache location, size, and cached services'));
     console.log(chalk.gray('  cache:update      Force update cache to latest version'));
