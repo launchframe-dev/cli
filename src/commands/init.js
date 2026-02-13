@@ -38,6 +38,8 @@ async function init(options = {}) {
 
     if (!accessCheck.hasAccess) {
       showAccessDeniedMessage();
+      trackEvent('command_executed', { command: 'init', success: false, error_message: 'access_denied' });
+      await new Promise((resolve) => setTimeout(resolve, 100));
       process.exit(1);
     }
 
