@@ -95,6 +95,36 @@ function isWaitlistInstalled(config = null) {
   return (config.installedServices || []).includes('waitlist');
 }
 
+/**
+ * Get list of installed modules
+ */
+function getInstalledModules() {
+  const config = getProjectConfig();
+  return config.installedModules || [];
+}
+
+/**
+ * Check if a module is installed
+ */
+function isModuleInstalled(moduleName) {
+  const installedModules = getInstalledModules();
+  return installedModules.includes(moduleName);
+}
+
+/**
+ * Add a module to the installed modules list
+ */
+function addInstalledModule(moduleName) {
+  const config = getProjectConfig();
+  if (!config.installedModules) {
+    config.installedModules = [];
+  }
+  if (!config.installedModules.includes(moduleName)) {
+    config.installedModules.push(moduleName);
+    updateProjectConfig(config);
+  }
+}
+
 module.exports = {
   isLaunchFrameProject,
   requireProject,
@@ -104,5 +134,8 @@ module.exports = {
   isComponentInstalled,
   addInstalledComponent,
   getPrimaryDomain,
-  isWaitlistInstalled
+  isWaitlistInstalled,
+  getInstalledModules,
+  isModuleInstalled,
+  addInstalledModule
 };

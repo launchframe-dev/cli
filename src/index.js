@@ -28,6 +28,7 @@ const {
   serviceList,
   serviceRemove
 } = require('./commands/service');
+const { moduleAdd, moduleList } = require('./commands/module');
 const { cacheClear, cacheInfo, cacheUpdate } = require('./commands/cache');
 
 // Get command and arguments
@@ -160,6 +161,17 @@ async function main() {
         process.exit(1);
       }
       await serviceRemove(args[1]);
+      break;
+    case 'module:add':
+      if (!args[1]) {
+        console.error(chalk.red('Error: Module name required'));
+        console.log('Usage: launchframe module:add <module-name>');
+        process.exit(1);
+      }
+      await moduleAdd(args[1]);
+      break;
+    case 'module:list':
+      await moduleList();
       break;
     case 'cache:clear':
       await cacheClear();
