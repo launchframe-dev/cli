@@ -1,6 +1,9 @@
 const fs = require('fs-extra');
+const { glob } = require('node:fs');
 const path = require('path');
-const fg = require('fast-glob');
+
+const EXCLUDED_DIRS = new Set(['node_modules', '.git', '.next', 'dist', 'build']);
+const BINARY_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.ico', '.pdf', '.woff', '.woff2', '.ttf', '.eot']);
 
 /**
  * Replace template variables in all files within a directory
@@ -9,31 +12,23 @@ const fg = require('fast-glob');
  */
 async function replaceVariables(directory, variables) {
   // Find all files (excluding node_modules, .git, binary files)
-  const files = await fg('**/*', {
-    cwd: directory,
-    onlyFiles: true,
-    dot: true, // Include hidden files/directories like .vitepress
-    ignore: [
-      '**/node_modules/**',
-      '**/.git/**',
-      '**/.next/**',
-      '**/dist/**',
-      '**/build/**',
-      '**/*.png',
-      '**/*.jpg',
-      '**/*.jpeg',
-      '**/*.gif',
-      '**/*.ico',
-      '**/*.pdf',
-      '**/*.woff',
-      '**/*.woff2',
-      '**/*.ttf',
-      '**/*.eot'
-    ]
+  const files = await new Promise((resolve, reject) => {
+    glob('**/*', {
+      cwd: directory,
+      exclude: (name) => EXCLUDED_DIRS.has(name),
+    }, (err, matches) => err ? reject(err) : resolve(matches));
   });
 
-  for (const file of files) {
+  const filtered = files.filter(f => {
+    const ext = path.extname(f).toLowerCase();
+    return !BINARY_EXTENSIONS.has(ext);
+  });
+
+  for (const file of filtered) {
     const filePath = path.join(directory, file);
+    // Skip directories (fs.glob includes them unlike third-party glob packages)
+    const stat = await fs.stat(filePath);
+    if (stat.isDirectory()) continue;
     await replaceVariablesInFile(filePath, variables);
   }
 }
