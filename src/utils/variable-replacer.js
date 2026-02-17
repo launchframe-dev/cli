@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
-const { glob } = require('glob');
+const fg = require('fast-glob');
 
 /**
  * Replace template variables in all files within a directory
@@ -9,9 +9,9 @@ const { glob } = require('glob');
  */
 async function replaceVariables(directory, variables) {
   // Find all files (excluding node_modules, .git, binary files)
-  const files = await glob('**/*', {
+  const files = await fg('**/*', {
     cwd: directory,
-    nodir: true,
+    onlyFiles: true,
     dot: true, // Include hidden files/directories like .vitepress
     ignore: [
       '**/node_modules/**',

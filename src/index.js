@@ -5,6 +5,14 @@ const { isLaunchFrameProject } = require('./utils/project-helpers');
 const logger = require('./utils/logger');
 const { initTelemetry, trackEvent, sanitize, setTelemetryEnabled, showTelemetryStatus } = require('./utils/telemetry');
 
+// Detect locally linked version: npm link installs to global node_modules
+// as a symlink. When running from a real install, __dirname is inside the
+// global node_modules folder. When linked, it resolves to the source directory.
+if (!__dirname.includes('node_modules')) {
+  const packageJson = require('../package.json');
+  console.log(chalk.yellow(`⚠ Running locally linked CLI v${packageJson.version} (${__dirname})`));
+}
+
 // Import commands
 const { init } = require('./commands/init');
 const { deployConfigure } = require('./commands/deploy-configure');
