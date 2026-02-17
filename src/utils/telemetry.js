@@ -64,10 +64,19 @@ function isDisabledByEnv() {
 }
 
 /**
+ * Check if running from a locally linked (dev) version
+ * @returns {boolean} True if running via npm link
+ */
+function isDevMode() {
+  return !__dirname.includes('node_modules');
+}
+
+/**
  * Check if telemetry is enabled
  * @returns {boolean} True if telemetry is enabled
  */
 function isEnabled() {
+  if (isDevMode()) return false;
   if (isDisabledByEnv()) return false;
   if (!config || !config.telemetry) return false;
   return config.telemetry.enabled !== false;
@@ -96,7 +105,7 @@ function initTelemetry() {
       writeConfig(config);
     }
 
-    if (!config.telemetry.noticeShown && !isDisabledByEnv()) {
+    if (!config.telemetry.noticeShown && !isDisabledByEnv() && !isDevMode()) {
       console.log(
         chalk.gray(
           '\nLaunchFrame collects anonymous usage data to improve the CLI.\n' +
