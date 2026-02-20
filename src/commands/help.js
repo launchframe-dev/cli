@@ -37,6 +37,11 @@ function help() {
     console.log(chalk.gray('  docker:logs [service]       View logs from all services or specific service'));
     console.log(chalk.gray('  docker:destroy              Remove all resources (containers, volumes, images)'));
     console.log(chalk.gray('    --force, -f               Skip confirmation prompt\n'));
+    console.log(chalk.white('Database Migrations:'));
+    console.log(chalk.gray('  migration:run              Run pending database migrations'));
+    console.log(chalk.gray('  migration:create           Create new database migration'));
+    console.log(chalk.gray('  migration:revert           Revert last database migration\n'));
+
     console.log(chalk.white('Service Management:'));
     console.log(chalk.gray('  service:add <name>     Add an optional service to your project'));
     console.log(chalk.gray('  service:list           List available services'));
@@ -77,9 +82,6 @@ function help() {
   } else {
     console.log(chalk.white('Available commands:'));
     console.log(chalk.gray('  init                        Initialize a new LaunchFrame project'));
-    console.log(chalk.gray('    --project-name <name>     Project name (skips prompt)'));
-    console.log(chalk.gray('    --tenancy <single|multi>  Tenancy model (skips prompt)'));
-    console.log(chalk.gray('    --user-model <b2b|b2b2c>  User model (skips prompt)'));
     console.log(chalk.gray('  help                        Show this help message\n'));
     console.log(chalk.white('Telemetry:'));
     console.log(chalk.gray('  telemetry                   Show telemetry status'));
@@ -90,10 +92,7 @@ function help() {
     console.log(chalk.gray('  cache:update      Force update cache to latest version'));
     console.log(chalk.gray('  cache:clear       Delete cache (re-download on next use)\n'));
     console.log(chalk.white('Examples:'));
-    console.log(chalk.gray('  # Interactive mode'));
     console.log(chalk.gray('  launchframe init\n'));
-    console.log(chalk.gray('  # Non-interactive mode'));
-    console.log(chalk.gray('  launchframe init --project-name my-saas --tenancy single --user-model b2b\n'));
     console.log(chalk.gray('  # With verbose output'));
     console.log(chalk.gray('  launchframe init --verbose\n'));
   }

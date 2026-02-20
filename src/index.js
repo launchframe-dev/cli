@@ -29,6 +29,9 @@ const { dockerBuild } = require('./commands/docker-build');
 const { dockerUp } = require('./commands/docker-up');
 const { dockerDown } = require('./commands/docker-down');
 const { dockerLogs } = require('./commands/docker-logs');
+const { migrateRun } = require('./commands/migration-run');
+const { migrateCreate } = require('./commands/migration-create');
+const { migrateRevert } = require('./commands/migration-revert');
 const { dockerDestroy } = require('./commands/docker-destroy');
 const { doctor } = require('./commands/doctor');
 const { help } = require('./commands/help');
@@ -100,7 +103,7 @@ async function main() {
   // Route commands
   switch (command) {
     case 'init':
-      await init({ 
+      await init({
         projectName: flags['project-name'],
         tenancy: flags['tenancy'],
         userModel: flags['user-model']
@@ -147,6 +150,15 @@ async function main() {
       break;
     case 'docker:destroy':
       await dockerDestroy({ force: flags.force || flags.f });
+      break;
+    case 'migration:run':
+      await migrateRun();
+      break;
+    case 'migration:create':
+      await migrateCreate();
+      break;
+    case 'migration:revert':
+      await migrateRevert();
       break;
     case 'doctor':
       await doctor();
