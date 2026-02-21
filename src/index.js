@@ -32,6 +32,7 @@ const { dockerLogs } = require('./commands/docker-logs');
 const { migrateRun } = require('./commands/migration-run');
 const { migrateCreate } = require('./commands/migration-create');
 const { migrateRevert } = require('./commands/migration-revert');
+const { databaseConsole } = require('./commands/database-console');
 const { dockerDestroy } = require('./commands/docker-destroy');
 const { doctor } = require('./commands/doctor');
 const { help } = require('./commands/help');
@@ -159,6 +160,9 @@ async function main() {
       break;
     case 'migration:revert':
       await migrateRevert();
+      break;
+    case 'database:console':
+      await databaseConsole({ remote: flags.remote });
       break;
     case 'doctor':
       await doctor();

@@ -41,6 +41,9 @@ function help() {
     console.log(chalk.gray('  migration:run              Run pending database migrations'));
     console.log(chalk.gray('  migration:create           Create new database migration'));
     console.log(chalk.gray('  migration:revert           Revert last database migration\n'));
+    console.log(chalk.white('Database:'));
+    console.log(chalk.gray('  database:console           Open a PostgreSQL console (local)'));
+    console.log(chalk.gray('    --remote                 Connect to the production database\n'));
 
     console.log(chalk.white('Service Management:'));
     console.log(chalk.gray('  service:add <name>     Add an optional service to your project'));
