@@ -24,7 +24,7 @@ function generateDummyUser() {
   const firstName = randomElement(FIRST_NAMES);
   const lastName = randomElement(LAST_NAMES);
   const suffix = String(Math.floor(1000 + Math.random() * 9000));
-  const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${suffix}@example.com`;
+  const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${suffix}@gmail.com`;
   return { firstName, lastName, name: `${firstName} ${lastName}`, email, suffix };
 }
 
