@@ -28,10 +28,10 @@
   "homepage": "https://launchframe.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/launchframe/cli.git"
+    "url": "git+https://github.com/launchframe-dev/cli.git"
   },
   "bugs": {
-    "url": "https://github.com/launchframe/cli/issues"
+    "url": "https://github.com/launchframe-dev/cli/issues"
   },
   "engines": {
     "node": ">=22.0.0"
