@@ -56,7 +56,8 @@ function help() {
     console.log(chalk.gray('  cache:update      Force update cache to latest version'));
     console.log(chalk.gray('  cache:clear       Delete cache (re-download on next use)\n'));
     console.log(chalk.white('Dev Helpers:'));
-    console.log(chalk.gray('  dev:add-user      Generate and insert a random test user into the local database\n'));
+    console.log(chalk.gray('  dev:add-user      Generate and insert a random test user into the local database'));
+    console.log(chalk.gray('  dev:queue         Open the Bull queue dashboard in the browser\n'));
     console.log(chalk.white('Other commands:'));
     console.log(chalk.gray('  doctor            Check project health and configuration'));
     console.log(chalk.gray('  telemetry         Show telemetry status'));

@@ -43,6 +43,7 @@ const {
 } = require('./commands/service');
 const { cacheClear, cacheInfo, cacheUpdate } = require('./commands/cache');
 const { devAddUser } = require('./commands/dev-add-user');
+const { devQueue } = require('./commands/dev-queue');
 
 // Get command and arguments
 const command = process.argv[2];
@@ -198,6 +199,9 @@ async function main() {
       break;
     case 'dev:add-user':
       await devAddUser();
+      break;
+    case 'dev:queue':
+      await devQueue();
       break;
     case 'telemetry':
       if (flags.disable) {
