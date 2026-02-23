@@ -3,6 +3,8 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 const path = require('path');
 const { MODULE_REGISTRY } = require('../services/module-registry');
+const { MODULE_CONFIG } = require('../services/module-config');
+const { installModule } = require('../utils/module-installer');
 const {
   requireProject,
   getProjectConfig,
@@ -106,8 +108,15 @@ async function moduleAdd(moduleName) {
   // Register module in .launchframe
   addInstalledModule(moduleName);
 
-  console.log(chalk.green(`\n✓ Module "${moduleName}" registered successfully!`));
-  console.log(chalk.gray('Note: Module source files will be available in a future update.'));
+  // Install module files, sections, and dependencies
+  const moduleServiceConfig = MODULE_CONFIG[moduleName];
+  if (moduleServiceConfig) {
+    await installModule(moduleName, moduleServiceConfig);
+  }
+
+  console.log(chalk.green(`\n✓ Module "${moduleName}" installed successfully!`));
+  console.log(chalk.yellow('\nNext step: rebuild the website container to apply changes:'));
+  console.log(chalk.gray('  docker-compose build website && docker-compose up -d website'));
 }
 
 module.exports = { moduleAdd, moduleList };
