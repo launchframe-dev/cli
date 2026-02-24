@@ -6,8 +6,9 @@ const { requireProject } = require('../utils/project-helpers');
 
 /**
  * Build Docker images for the project
+ * @param {string} [serviceName] - Optional service to build (builds all if omitted)
  */
-async function dockerBuild() {
+async function dockerBuild(serviceName) {
   requireProject();
 
   const infrastructurePath = path.join(process.cwd(), 'infrastructure');
@@ -18,11 +19,11 @@ async function dockerBuild() {
     process.exit(1);
   }
 
-  console.log(chalk.blue.bold('\n🔨 Building Docker Images\n'));
-  console.log(chalk.gray('This will build all service images for local development...\n'));
+  const target = serviceName ? `${serviceName} service` : 'all services';
+  console.log(chalk.blue.bold(`\n🔨 Building Docker Images (${target})\n`));
 
   try {
-    const buildCommand = 'docker-compose -f docker-compose.yml -f docker-compose.dev.yml build';
+    const buildCommand = `docker-compose -f docker-compose.yml -f docker-compose.dev.yml build${serviceName ? ` ${serviceName}` : ''}`;
 
     console.log(chalk.gray(`Running: ${buildCommand}\n`));
 
@@ -32,8 +33,10 @@ async function dockerBuild() {
     });
 
     console.log(chalk.green.bold('\n✅ Docker images built successfully!\n'));
-    console.log(chalk.white('Next steps:'));
-    console.log(chalk.gray('  launchframe docker:up    # Start all services\n'));
+    if (!serviceName) {
+      console.log(chalk.white('Next steps:'));
+      console.log(chalk.gray('  launchframe docker:up    # Start all services\n'));
+    }
 
   } catch (error) {
     console.error(chalk.red('\n❌ Error during build:'), error.message);

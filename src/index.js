@@ -41,6 +41,7 @@ const {
   serviceList,
   serviceRemove
 } = require('./commands/service');
+const { moduleAdd, moduleList } = require('./commands/module');
 const { cacheClear, cacheInfo, cacheUpdate } = require('./commands/cache');
 const { devAddUser } = require('./commands/dev-add-user');
 const { devQueue } = require('./commands/dev-queue');
@@ -140,7 +141,7 @@ async function main() {
       await waitlistLogs();
       break;
     case 'docker:build':
-      await dockerBuild();
+      await dockerBuild(args[1]); // Optional service name
       break;
     case 'docker:up':
       await dockerUp(args[1]); // Pass optional service name
@@ -187,6 +188,17 @@ async function main() {
         process.exit(1);
       }
       await serviceRemove(args[1]);
+      break;
+    case 'module:add':
+      if (!args[1]) {
+        console.error(chalk.red('Error: Module name required'));
+        console.log('Usage: launchframe module:add <module-name>');
+        process.exit(1);
+      }
+      await moduleAdd(args[1]);
+      break;
+    case 'module:list':
+      await moduleList();
       break;
     case 'cache:clear':
       await cacheClear();

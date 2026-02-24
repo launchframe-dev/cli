@@ -49,6 +49,9 @@ function help() {
     console.log(chalk.gray('  service:add <name>     Add an optional service to your project'));
     console.log(chalk.gray('  service:list           List available services'));
     console.log(chalk.gray('  service:remove <name>  Remove installed service\n'));
+    console.log(chalk.white('Module Management:'));
+    console.log(chalk.gray('  module:add <name>      Add a module to your project'));
+    console.log(chalk.gray('  module:list            List available modules\n'));
     console.log(chalk.white('Available Services:'));
     console.log(chalk.gray('  waitlist          Coming soon page with email collection\n'));
     console.log(chalk.white('Cache Management:'));
