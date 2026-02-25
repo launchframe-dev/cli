@@ -13,8 +13,8 @@ async function installModule(moduleName, moduleConfig) {
   const cwd = process.cwd();
 
   for (const [serviceName, config] of Object.entries(moduleConfig)) {
-    const moduleFilesDir = path.join(templateRoot, serviceName, 'modules', config.modulesDir, 'files');
-    const moduleSectionsDir = path.join(templateRoot, serviceName, 'modules', config.modulesDir, 'sections');
+    const moduleFilesDir = path.join(templateRoot, 'modules', moduleName, serviceName, 'files');
+    const moduleSectionsDir = path.join(templateRoot, 'modules', moduleName, serviceName, 'sections');
     const serviceDir = path.join(cwd, serviceName);
 
     // Copy files

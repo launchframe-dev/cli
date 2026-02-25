@@ -2,7 +2,6 @@
 const MODULE_CONFIG = {
   blog: {
     website: {
-      modulesDir: 'blog',
       files: [
         'src/lib/blog.ts',
         'src/types/blog.ts',
