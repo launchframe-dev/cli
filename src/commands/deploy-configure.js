@@ -53,7 +53,8 @@ async function deployConfigure() {
     '{{PRIMARY_DOMAIN}}': deployAnswers.primaryDomain,
     '{{ADMIN_EMAIL}}': deployAnswers.adminEmail,
     '{{GITHUB_ORG}}': deployAnswers.githubOrg,
-    '{{VPS_APP_FOLDER}}': deployAnswers.vpsAppFolder
+    '{{VPS_APP_FOLDER}}': deployAnswers.vpsAppFolder,
+    '{{PROJECT_NAME}}': config.projectName
   };
 
   console.log(chalk.yellow('\n⚙️  Updating configuration files...\n'));
@@ -74,6 +75,9 @@ async function deployConfigure() {
     'admin-portal/src/App.tsx',
     'admin-portal/src/components/common/PageTitle.tsx',
     'admin-portal/src/sentry.tsx',
+    'backend/.github/workflows/deploy-backend.yml',
+    'admin-portal/.github/workflows/deploy-admin-portal.yml',
+    'website/.github/workflows/deploy-website.yml',
   ];
 
   if (config.variants.tenancy === 'multi-tenant') {
