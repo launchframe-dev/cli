@@ -45,6 +45,7 @@ const { moduleAdd, moduleList } = require('./commands/module');
 const { cacheClear, cacheInfo, cacheUpdate } = require('./commands/cache');
 const { devAddUser } = require('./commands/dev-add-user');
 const { devQueue } = require('./commands/dev-queue');
+const { deploySyncFeatures } = require('./commands/deploy-sync-features');
 
 // Get command and arguments
 const command = process.argv[2];
@@ -127,6 +128,9 @@ async function main() {
       break;
     case 'deploy:build':
       await deployBuild(args[1]); // Optional service name
+      break;
+    case 'deploy:sync-features':
+      await deploySyncFeatures();
       break;
     case 'waitlist:deploy':
       await waitlistDeploy();

@@ -20,7 +20,8 @@ function help() {
     console.log(chalk.gray('  deploy:set-env    Configure production environment variables'));
     console.log(chalk.gray('  deploy:init       Initialize VPS and build Docker images'));
     console.log(chalk.gray('  deploy:up         Start services on VPS'));
-    console.log(chalk.gray('  deploy:build [service]  Build, push, and deploy (all or specific service)\n'));
+    console.log(chalk.gray('  deploy:build [service]        Build, push, and deploy (all or specific service)'));
+    console.log(chalk.gray('  deploy:sync-features          Sync local features and plan assignments to production\n'));
 
     // Conditionally show waitlist commands
     if (isWaitlistInstalled()) {
