@@ -92,7 +92,8 @@ async function deployConfigure() {
   if (config.variants.userModel === 'b2b2c') {
     filesToUpdate.push(
       'admin-portal/src/components/settings/CustomDomain.tsx',
-      'customers-portal/src/App.tsx'
+      'customers-portal/src/App.tsx',
+      'customers-portal/.github/workflows/deploy-customers-portal.yml',
     )
   }
 
