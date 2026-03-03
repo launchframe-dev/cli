@@ -45,6 +45,7 @@ const { moduleAdd, moduleList } = require('./commands/module');
 const { cacheClear, cacheInfo, cacheUpdate } = require('./commands/cache');
 const { devAddUser } = require('./commands/dev-add-user');
 const { devQueue } = require('./commands/dev-queue');
+const { devLogo } = require('./commands/dev-logo');
 const { deploySyncFeatures } = require('./commands/deploy-sync-features');
 
 // Get command and arguments
@@ -218,6 +219,9 @@ async function main() {
       break;
     case 'dev:queue':
       await devQueue();
+      break;
+    case 'dev:logo':
+      await devLogo();
       break;
     case 'telemetry':
       if (flags.disable) {

@@ -40,10 +40,12 @@
     "access": "public"
   },
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "bcryptjs": "^2.4.3",
     "chalk": "^4.1.2",
     "dotenv": "^17.3.1",
     "fs-extra": "^11.1.1",
-    "inquirer": "^8.2.5"
+    "inquirer": "^8.2.5",
+    "to-ico": "^1.1.5"
   }
 }
