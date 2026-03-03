@@ -54,7 +54,8 @@ async function deployConfigure() {
     '{{ADMIN_EMAIL}}': deployAnswers.adminEmail,
     '{{GITHUB_ORG}}': deployAnswers.githubOrg,
     '{{VPS_APP_FOLDER}}': deployAnswers.vpsAppFolder,
-    '{{PROJECT_NAME}}': config.projectName
+    '{{PROJECT_NAME}}': config.projectName,
+    '{{PROJECT_NAME_UPPER}}': config.projectName.toUpperCase()
   };
 
   console.log(chalk.yellow('\n⚙️  Updating configuration files...\n'));
@@ -78,6 +79,7 @@ async function deployConfigure() {
     'backend/.github/workflows/deploy-backend.yml',
     'admin-portal/.github/workflows/deploy-admin-portal.yml',
     'website/.github/workflows/deploy-website.yml',
+    'infrastructure/scripts/zero-downtime-deploy.sh',
   ];
 
   if (config.variants.tenancy === 'multi-tenant') {
