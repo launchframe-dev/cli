@@ -62,7 +62,8 @@ function help() {
     console.log(chalk.white('Dev Helpers:'));
     console.log(chalk.gray('  dev:add-user      Generate and insert a random test user into the local database'));
     console.log(chalk.gray('  dev:queue         Open the Bull queue dashboard in the browser'));
-    console.log(chalk.gray('  dev:logo          Generate and inject favicon/logo assets from logo.svg\n'));
+    console.log(chalk.gray('  dev:logo          Generate and inject favicon/logo assets from logo.svg'));
+    console.log(chalk.gray('  dev:npm-install <service> [packages...]  Install npm packages using node:20-alpine\n'));
     console.log(chalk.white('Other commands:'));
     console.log(chalk.gray('  doctor            Check project health and configuration'));
     console.log(chalk.gray('  telemetry         Show telemetry status'));

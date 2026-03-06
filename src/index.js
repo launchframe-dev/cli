@@ -46,6 +46,7 @@ const { cacheClear, cacheInfo, cacheUpdate } = require('./commands/cache');
 const { devAddUser } = require('./commands/dev-add-user');
 const { devQueue } = require('./commands/dev-queue');
 const { devLogo } = require('./commands/dev-logo');
+const { devNpmInstall } = require('./commands/dev-npm-install');
 const { deploySyncFeatures } = require('./commands/deploy-sync-features');
 
 // Get command and arguments
@@ -222,6 +223,14 @@ async function main() {
       break;
     case 'dev:logo':
       await devLogo();
+      break;
+    case 'dev:npm-install':
+      if (!args[1]) {
+        console.error(chalk.red('Error: Service name required'));
+        console.log('Usage: launchframe dev:npm-install <service> [packages...]');
+        process.exit(1);
+      }
+      await devNpmInstall(args[1], args.slice(2));
       break;
     case 'telemetry':
       if (flags.disable) {
