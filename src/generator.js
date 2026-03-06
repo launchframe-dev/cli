@@ -160,6 +160,17 @@ async function generateProject(answers, variantChoices, templateRoot) {
     }
   }
 
+  // Copy MCP configuration files from template root
+  logger.detail('Copying MCP configuration files...');
+  const mcpFiles = ['CLAUDE.md', '.mcp.json'];
+  for (const file of mcpFiles) {
+    const sourcePath = path.join(templateRoot, file);
+    const destPath = path.join(destinationRoot, file);
+    if (await fs.pathExists(sourcePath)) {
+      await fs.copy(sourcePath, destPath);
+    }
+  }
+
   // Generate .env file
   console.log(chalk.gray('  Generating environment file...'));
   const { envPath } = await generateEnvFile(destinationRoot, answers);
