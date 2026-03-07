@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const { execSync } = require('child_process');
 const { requireProject } = require('../utils/project-helpers');
 
-async function migrateCreate() {
+async function migrateCreate(migrationName) {
   requireProject();
 
   const infrastructurePath = path.join(process.cwd(), 'infrastructure');
@@ -14,8 +14,6 @@ async function migrateCreate() {
     console.log(chalk.gray('Make sure you are in the root of your LaunchFrame project.\n'));
     process.exit(1);
   }
-
-  const migrationName = process.argv[3];
 
   if (!migrationName) {
     console.error(chalk.red('\n❌ Error: migration name is required'));

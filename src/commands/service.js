@@ -10,7 +10,7 @@ const { updateEnvFile } = require('../utils/env-generator');
 const { checkGitHubAccess, showAccessDeniedMessage } = require('../utils/github-access');
 const { ensureCacheReady, getServicePath } = require('../utils/service-cache');
 
-async function serviceAdd(serviceName) {
+async function serviceAdd(serviceName, flags = {}) {
   // STEP 1: Validation
   console.log(chalk.blue(`Installing ${serviceName} service...`));
 
@@ -49,16 +49,18 @@ async function serviceAdd(serviceName) {
   console.log(`Tech stack: ${service.techStack}`);
   console.log(`Dependencies: ${service.dependencies.join(', ')}`);
 
-  const { confirmed } = await inquirer.prompt([{
-    type: 'confirm',
-    name: 'confirmed',
-    message: 'Continue with installation?',
-    default: true
-  }]);
+  if (!(flags.yes || flags.y)) {
+    const { confirmed } = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'confirmed',
+      message: 'Continue with installation?',
+      default: true
+    }]);
 
-  if (!confirmed) {
-    console.log('Installation cancelled');
-    process.exit(0);
+    if (!confirmed) {
+      console.log('Installation cancelled');
+      process.exit(0);
+    }
   }
 
   // STEP 3: Get service files (from cache in production, local in dev)
@@ -124,7 +126,7 @@ async function serviceAdd(serviceName) {
 
   // STEP 4: Service-specific prompts (e.g., Airtable credentials)
   console.log(chalk.blue('\nConfiguring service...'));
-  const envValues = await runServicePrompts(service);
+  const envValues = await runServicePrompts(service, flags);
 
   // STEP 5: Replace template variables
   console.log(chalk.blue('\nCustomizing service for your project...'));
@@ -265,8 +267,16 @@ async function serviceAdd(serviceName) {
   console.log(`\n📖 See README.md in ${serviceName}/ for more details.`);
 }
 
-async function runServicePrompts(service) {
+async function runServicePrompts(service, flags = {}) {
   const envValues = {};
+
+  if (flags.yes || flags.y) {
+    // Non-interactive mode — use empty values; configure manually after install
+    for (const key of Object.keys(service.envVars)) {
+      envValues[key] = '';
+    }
+    return envValues;
+  }
 
   // Prompt for each required env var
   for (const [key, description] of Object.entries(service.envVars)) {

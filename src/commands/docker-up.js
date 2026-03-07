@@ -7,8 +7,10 @@ const { requireProject, getProjectConfig } = require('../utils/project-helpers')
 /**
  * Start Docker services (all or specific service)
  * @param {string} serviceName - Optional service name to start (e.g., 'docs', 'backend')
+ * @param {Object} flags - Optional flags
+ * @param {boolean} flags.detach - Run detached (docker-compose up -d) instead of watch mode
  */
-async function dockerUp(serviceName) {
+async function dockerUp(serviceName, flags = {}) {
   requireProject();
 
   const infrastructurePath = path.join(process.cwd(), 'infrastructure');
@@ -19,14 +21,26 @@ async function dockerUp(serviceName) {
     process.exit(1);
   }
 
+  if (flags.detach) {
+    // Detached mode — start services in background (no watch, no blocking)
+    const upCommand = serviceName
+      ? `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d ${serviceName}`
+      : 'docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d';
+
+    console.log(chalk.gray(`Running: ${upCommand}\n`));
+    execSync(upCommand, { cwd: infrastructurePath, stdio: 'inherit' });
+    console.log(chalk.green.bold('\n✅ Services started in detached mode.\n'));
+    return;
+  }
+
   // Check Docker Compose version for watch support
   try {
     const composeVersion = execSync('docker compose version', { encoding: 'utf8' });
     const versionMatch = composeVersion.match(/v?(\d+)\.(\d+)\.(\d+)/);
-    
+
     if (versionMatch) {
       const [, major, minor] = versionMatch.map(Number);
-      
+
       if (major < 2 || (major === 2 && minor < 22)) {
         console.error(chalk.red('\n❌ Error: Docker Compose v2.22+ is required for watch support'));
         console.log(chalk.yellow(`Current version: Docker Compose v${major}.${minor}`));

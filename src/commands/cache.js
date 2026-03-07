@@ -3,24 +3,29 @@ const { clearCache, getCacheInfo } = require('../utils/service-cache');
 
 /**
  * Clear service cache
+ * @param {Object} flags - Optional flags
+ * @param {boolean} flags.yes - Skip confirmation prompt
+ * @param {boolean} flags.y - Skip confirmation prompt (short form)
  */
-async function cacheClear() {
+async function cacheClear(flags = {}) {
   console.log(chalk.yellow('\n⚠️  This will delete all cached services'));
   console.log(chalk.gray('You will need to re-download on next init or service:add\n'));
-  
-  const inquirer = require('inquirer');
-  const { confirmed } = await inquirer.prompt([{
-    type: 'confirm',
-    name: 'confirmed',
-    message: 'Continue with cache clear?',
-    default: false
-  }]);
-  
-  if (!confirmed) {
-    console.log('Cancelled');
-    return;
+
+  if (!(flags.yes || flags.y)) {
+    const inquirer = require('inquirer');
+    const { confirmed } = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'confirmed',
+      message: 'Continue with cache clear?',
+      default: false
+    }]);
+
+    if (!confirmed) {
+      console.log('Cancelled');
+      return;
+    }
   }
-  
+
   await clearCache();
 }
 

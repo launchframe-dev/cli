@@ -132,7 +132,7 @@ async function main() {
       await deployBuild(args[1]); // Optional service name
       break;
     case 'deploy:sync-features':
-      await deploySyncFeatures();
+      await deploySyncFeatures(flags);
       break;
     case 'waitlist:deploy':
       await waitlistDeploy();
@@ -144,19 +144,19 @@ async function main() {
       await waitlistDown();
       break;
     case 'waitlist:logs':
-      await waitlistLogs();
+      await waitlistLogs(flags);
       break;
     case 'docker:build':
       await dockerBuild(args[1]); // Optional service name
       break;
     case 'docker:up':
-      await dockerUp(args[1]); // Pass optional service name
+      await dockerUp(args[1] || flags.service, flags);
       break;
     case 'docker:down':
       await dockerDown();
       break;
     case 'docker:logs':
-      await dockerLogs();
+      await dockerLogs(args[1] || flags.service, flags);
       break;
     case 'docker:destroy':
       await dockerDestroy({ force: flags.force || flags.f });
@@ -165,24 +165,24 @@ async function main() {
       await migrateRun();
       break;
     case 'migration:create':
-      await migrateCreate();
+      await migrateCreate(args[1] || flags.name);
       break;
     case 'migration:revert':
       await migrateRevert();
       break;
     case 'database:console':
-      await databaseConsole({ remote: flags.remote });
+      await databaseConsole({ remote: flags.remote, query: flags.query });
       break;
     case 'doctor':
       await doctor();
       break;
     case 'service:add':
-      if (!args[1]) {
+      if (!args[1] && !flags.service) {
         console.error(chalk.red('Error: Service name required'));
         console.log('Usage: launchframe service:add <service-name>');
         process.exit(1);
       }
-      await serviceAdd(args[1]);
+      await serviceAdd(args[1] || flags.service, flags);
       break;
     case 'service:list':
       await serviceList();
@@ -196,18 +196,18 @@ async function main() {
       await serviceRemove(args[1]);
       break;
     case 'module:add':
-      if (!args[1]) {
+      if (!args[1] && !flags.name) {
         console.error(chalk.red('Error: Module name required'));
         console.log('Usage: launchframe module:add <module-name>');
         process.exit(1);
       }
-      await moduleAdd(args[1]);
+      await moduleAdd(args[1] || flags.name, flags);
       break;
     case 'module:list':
       await moduleList();
       break;
     case 'cache:clear':
-      await cacheClear();
+      await cacheClear(flags);
       break;
     case 'cache:info':
       await cacheInfo();
@@ -222,7 +222,7 @@ async function main() {
       await devQueue();
       break;
     case 'dev:logo':
-      await devLogo();
+      await devLogo(args[1] || flags.svg);
       break;
     case 'dev:npm-install':
       if (!args[1]) {

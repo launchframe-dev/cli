@@ -1,11 +1,14 @@
 const chalk = require('chalk');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 const { requireProject, getProjectConfig, isWaitlistInstalled } = require('../utils/project-helpers');
 
 /**
- * View waitlist logs from VPS (streaming)
+ * View waitlist logs from VPS
+ * @param {Object} flags - Optional flags
+ * @param {boolean} flags['no-follow'] - Snapshot mode: print tail and exit (non-interactive)
+ * @param {number} flags.tail - Number of lines to show (default 100, used with --no-follow)
  */
-async function waitlistLogs() {
+async function waitlistLogs(flags = {}) {
   requireProject();
 
   console.log(chalk.blue.bold('\n📋 Waitlist Logs\n'));
@@ -28,6 +31,20 @@ async function waitlistLogs() {
 
   const { vpsHost, vpsUser, vpsAppFolder } = config.deployment;
 
+  if (flags['no-follow']) {
+    // Snapshot mode — print tail and exit (non-interactive, suitable for MCP)
+    const tail = flags.tail || 100;
+    const sshCmd = `cd ${vpsAppFolder}/waitlist && docker-compose -f docker-compose.waitlist.yml logs --no-follow --tail=${tail}`;
+
+    const result = spawnSync('ssh', [`${vpsUser}@${vpsHost}`, sshCmd], { stdio: 'inherit' });
+
+    if (result.status !== 0 && result.status !== null) {
+      console.log(chalk.yellow(`\n⚠️  Process exited with code ${result.status}\n`));
+    }
+    return;
+  }
+
+  // Streaming mode (interactive)
   console.log(chalk.gray('Connecting to VPS and streaming logs...\n'));
   console.log(chalk.gray('Press Ctrl+C to exit\n'));
 

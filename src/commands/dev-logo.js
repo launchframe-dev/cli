@@ -30,12 +30,13 @@ function writeFile(filePath, data) {
 
 /**
  * Generate and inject logo/favicon assets across all relevant frontend services
+ * @param {string} svgPath - Optional path to SVG file (defaults to <projectRoot>/logo.svg)
  */
-async function devLogo() {
+async function devLogo(svgPath) {
   requireProject();
 
   const cwd = process.cwd();
-  const logoPath = path.join(cwd, 'logo.svg');
+  const logoPath = svgPath || path.join(cwd, 'logo.svg');
 
   if (!fs.existsSync(logoPath)) {
     console.error(chalk.red('\n❌ Error: logo.svg not found'));

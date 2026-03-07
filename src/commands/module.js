@@ -41,7 +41,7 @@ async function moduleList() {
   console.log('  launchframe module:add <module-name>');
 }
 
-async function moduleAdd(moduleName) {
+async function moduleAdd(moduleName, flags = {}) {
   requireProject();
 
   // Validate module exists in registry
@@ -97,16 +97,18 @@ async function moduleAdd(moduleName) {
   console.log(mod.description);
   console.log(`Affects services: ${mod.services.join(', ')}`);
 
-  const { confirmed } = await inquirer.prompt([{
-    type: 'confirm',
-    name: 'confirmed',
-    message: `Add module "${mod.displayName}" to your project?`,
-    default: true
-  }]);
+  if (!(flags.yes || flags.y)) {
+    const { confirmed } = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'confirmed',
+      message: `Add module "${mod.displayName}" to your project?`,
+      default: true
+    }]);
 
-  if (!confirmed) {
-    console.log('Installation cancelled');
-    process.exit(0);
+    if (!confirmed) {
+      console.log('Installation cancelled');
+      process.exit(0);
+    }
   }
 
   const affectedServices = [...new Set(Object.keys(MODULE_CONFIG[moduleName] || {}))].filter(s => s !== 'infrastructure');
@@ -139,8 +141,8 @@ async function moduleAdd(moduleName) {
     await dockerBuild(service);
   }
 
-  // Restart the full stack in watch mode
-  await dockerUp();
+  // Restart the full stack (detached when running non-interactively, watch otherwise)
+  await dockerUp(undefined, flags.yes || flags.y ? { detach: true } : {});
 }
 
 module.exports = { moduleAdd, moduleList };

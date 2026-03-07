@@ -5,7 +5,7 @@ const inquirer = require('inquirer');
 const { spawnSync } = require('child_process');
 const { requireProject, getProjectConfig } = require('../utils/project-helpers');
 
-async function databaseConsole({ remote = false } = {}) {
+async function databaseConsole({ remote = false, query = null } = {}) {
   requireProject();
 
   const infrastructurePath = path.join(process.cwd(), 'infrastructure');
@@ -28,7 +28,24 @@ async function databaseConsole({ remote = false } = {}) {
 
     const { vpsUser, vpsHost, vpsAppFolder } = config.deployment;
 
-    // 2. Warn before connecting to production
+    if (query) {
+      // Non-interactive query mode — pipe SQL via stdin, skip confirmation
+      const remoteCmd = `cd ${vpsAppFolder}/infrastructure && docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T database sh -c 'psql -U $POSTGRES_USER $POSTGRES_DB'`;
+      const result = spawnSync('ssh', [`${vpsUser}@${vpsHost}`, remoteCmd], {
+        input: query,
+        stdio: ['pipe', 'inherit', 'inherit'],
+        encoding: 'utf8'
+      });
+
+      if (result.status !== 0) {
+        console.error(chalk.red('\n❌ Could not execute query on the production database.'));
+        console.log(chalk.gray('Check that the VPS is reachable and services are running.\n'));
+        process.exit(1);
+      }
+      return;
+    }
+
+    // 2. Warn before connecting to production (interactive mode only)
     console.log(chalk.yellow.bold('\n⚠️  You are about to connect to the PRODUCTION database.\n'));
     console.log(chalk.gray(`  Host: ${vpsHost}`));
     console.log(chalk.gray(`  Folder: ${vpsAppFolder}\n`));
@@ -62,6 +79,29 @@ async function databaseConsole({ remote = false } = {}) {
       process.exit(1);
     }
   } else {
+    if (query) {
+      // Non-interactive local query mode — pipe SQL via stdin
+      const psqlCmd = [
+        'compose', '-f', 'docker-compose.yml', '-f', 'docker-compose.dev.yml',
+        'exec', '-T', 'database', 'sh', '-c', 'psql -U $POSTGRES_USER $POSTGRES_DB'
+      ];
+
+      const result = spawnSync('docker', psqlCmd, {
+        cwd: infrastructurePath,
+        input: query,
+        stdio: ['pipe', 'inherit', 'inherit'],
+        encoding: 'utf8'
+      });
+
+      if (result.status !== 0) {
+        console.error(chalk.red('\n❌ Could not execute query on the local database container.'));
+        console.log(chalk.gray('Make sure services are running:'));
+        console.log(chalk.white('  launchframe docker:up\n'));
+        process.exit(1);
+      }
+      return;
+    }
+
     console.log(chalk.blue.bold('\n🗄️  Opening local database console...\n'));
 
     // Let the shell inside the container expand $POSTGRES_USER / $POSTGRES_DB

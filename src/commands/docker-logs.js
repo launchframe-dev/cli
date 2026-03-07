@@ -1,13 +1,17 @@
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const { requireProject } = require('../utils/project-helpers');
 
 /**
  * View logs from Docker services
+ * @param {string} service - Optional service name to filter logs
+ * @param {Object} flags - Optional flags
+ * @param {boolean} flags['no-follow'] - Snapshot mode: print lines and exit (non-interactive)
+ * @param {number} flags.tail - Number of lines to show (default 100, only used with --no-follow)
  */
-async function dockerLogs() {
+async function dockerLogs(service, flags = {}) {
   requireProject();
 
   const infrastructurePath = path.join(process.cwd(), 'infrastructure');
@@ -18,9 +22,24 @@ async function dockerLogs() {
     process.exit(1);
   }
 
-  // Get optional service name from args (e.g., launchframe docker:logs backend)
-  const service = process.argv[3];
+  const noFollow = flags['no-follow'];
 
+  if (noFollow) {
+    // Snapshot mode — print tail and exit (non-interactive, suitable for MCP)
+    const tail = flags.tail || 100;
+    const args = ['-f', 'docker-compose.yml', '-f', 'docker-compose.dev.yml', 'logs', '--no-follow', '--tail', String(tail)];
+    if (service) args.push(service);
+
+    try {
+      execSync(`docker-compose ${args.join(' ')}`, { cwd: infrastructurePath, stdio: 'inherit' });
+    } catch (error) {
+      console.error(chalk.red('\n❌ Error viewing logs:'), error.message);
+      process.exit(1);
+    }
+    return;
+  }
+
+  // Streaming mode (interactive)
   console.log(chalk.blue.bold('\n📋 Docker Service Logs\n'));
 
   if (service) {
@@ -34,14 +53,14 @@ async function dockerLogs() {
 
   try {
     const logsCommand = 'docker-compose';
-    const args = ['-f', 'docker-compose.yml', '-f', 'docker-compose.dev.yml', 'logs', '-f'];
+    const spawnArgs = ['-f', 'docker-compose.yml', '-f', 'docker-compose.dev.yml', 'logs', '-f'];
 
     if (service) {
-      args.push(service);
+      spawnArgs.push(service);
     }
 
     // Use spawn to stream output in real-time
-    const child = spawn(logsCommand, args, {
+    const child = spawn(logsCommand, spawnArgs, {
       cwd: infrastructurePath,
       stdio: 'inherit',
       shell: true

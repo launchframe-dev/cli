@@ -34,7 +34,7 @@ function sqlBool(val) {
   return val ? 'true' : 'false';
 }
 
-async function deploySyncFeatures() {
+async function deploySyncFeatures(flags = {}) {
   requireProject();
 
   // Step 1 — Project + infrastructure check
@@ -162,18 +162,20 @@ async function deploySyncFeatures() {
   console.log(chalk.gray(`  Remote host:                ${vpsHost}\n`));
   console.log(chalk.red('This will TRUNCATE subscription_plan_features (cascades to feature values).\n'));
 
-  const { confirmed } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'confirmed',
-      message: 'Are you sure you want to sync features to production?',
-      default: false
-    }
-  ]);
+  if (!flags.yes) {
+    const { confirmed } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'confirmed',
+        message: 'Are you sure you want to sync features to production?',
+        default: false
+      }
+    ]);
 
-  if (!confirmed) {
-    console.log(chalk.gray('\nAborted.\n'));
-    process.exit(0);
+    if (!confirmed) {
+      console.log(chalk.gray('\nAborted.\n'));
+      process.exit(0);
+    }
   }
 
   // Step 9 — Build sync SQL transaction
