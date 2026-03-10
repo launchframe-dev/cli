@@ -63,14 +63,22 @@ function parseFlags(args) {
   for (let i = 1; i < args.length; i++) {
     const arg = args[i];
     if (arg.startsWith('--')) {
-      const flagName = arg.substring(2);
-      const nextArg = args[i + 1];
-      // Check if next arg is a value (not a flag)
-      if (nextArg && !nextArg.startsWith('-')) {
-        flags[flagName] = nextArg;
-        i++; // Skip next arg since we consumed it
+      const withoutDashes = arg.substring(2);
+      const eqIndex = withoutDashes.indexOf('=');
+      if (eqIndex !== -1) {
+        // --key=value format
+        const flagName = withoutDashes.substring(0, eqIndex);
+        flags[flagName] = withoutDashes.substring(eqIndex + 1) || true;
       } else {
-        flags[flagName] = true; // Boolean flag
+        const flagName = withoutDashes;
+        const nextArg = args[i + 1];
+        // Check if next arg is a value (not a flag)
+        if (nextArg && !nextArg.startsWith('-')) {
+          flags[flagName] = nextArg;
+          i++; // Skip next arg since we consumed it
+        } else {
+          flags[flagName] = true; // Boolean flag
+        }
       }
     } else if (arg.startsWith('-') && arg.length === 2) {
       const flagName = arg.substring(1);
@@ -171,7 +179,7 @@ async function main() {
       await migrateRevert();
       break;
     case 'database:console':
-      await databaseConsole({ remote: flags.remote, query: flags.query });
+      await databaseConsole({ remote: flags.remote, query: flags.query, skipPermission: !!flags['skip-permission'] });
       break;
     case 'doctor':
       await doctor();

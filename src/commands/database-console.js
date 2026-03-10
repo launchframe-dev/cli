@@ -5,7 +5,7 @@ const inquirer = require('inquirer');
 const { spawnSync } = require('child_process');
 const { requireProject, getProjectConfig } = require('../utils/project-helpers');
 
-async function databaseConsole({ remote = false, query = null } = {}) {
+async function databaseConsole({ remote = false, query = null, skipPermission = false } = {}) {
   requireProject();
 
   const infrastructurePath = path.join(process.cwd(), 'infrastructure');
@@ -31,11 +31,14 @@ async function databaseConsole({ remote = false, query = null } = {}) {
     if (query) {
       // Non-interactive query mode — pipe SQL via stdin, skip confirmation
       const remoteCmd = `cd ${vpsAppFolder}/infrastructure && docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T database sh -c 'psql -U $POSTGRES_USER $POSTGRES_DB'`;
-      const result = spawnSync('ssh', [`${vpsUser}@${vpsHost}`, remoteCmd], {
+      const result = spawnSync('ssh', ['-T', `${vpsUser}@${vpsHost}`, remoteCmd], {
         input: query,
-        stdio: ['pipe', 'inherit', 'inherit'],
+        stdio: ['pipe', 'pipe', 'pipe'],
         encoding: 'utf8'
       });
+
+      if (result.stdout) process.stdout.write(result.stdout);
+      if (result.stderr) process.stderr.write(result.stderr);
 
       if (result.status !== 0) {
         console.error(chalk.red('\n❌ Could not execute query on the production database.'));
@@ -46,22 +49,24 @@ async function databaseConsole({ remote = false, query = null } = {}) {
     }
 
     // 2. Warn before connecting to production (interactive mode only)
-    console.log(chalk.yellow.bold('\n⚠️  You are about to connect to the PRODUCTION database.\n'));
-    console.log(chalk.gray(`  Host: ${vpsHost}`));
-    console.log(chalk.gray(`  Folder: ${vpsAppFolder}\n`));
+    if (!skipPermission) {
+      console.log(chalk.yellow.bold('\n⚠️  You are about to connect to the PRODUCTION database.\n'));
+      console.log(chalk.gray(`  Host: ${vpsHost}`));
+      console.log(chalk.gray(`  Folder: ${vpsAppFolder}\n`));
 
-    const { confirmed } = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'confirmed',
-        message: 'Are you sure you want to open a console to the production database?',
-        default: false
+      const { confirmed } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirmed',
+          message: 'Are you sure you want to open a console to the production database?',
+          default: false
+        }
+      ]);
+
+      if (!confirmed) {
+        console.log(chalk.gray('\nAborted.\n'));
+        process.exit(0);
       }
-    ]);
-
-    if (!confirmed) {
-      console.log(chalk.gray('\nAborted.\n'));
-      process.exit(0);
     }
 
     console.log(chalk.blue.bold('\n🔌 Connecting to production database...\n'));
@@ -89,9 +94,12 @@ async function databaseConsole({ remote = false, query = null } = {}) {
       const result = spawnSync('docker', psqlCmd, {
         cwd: infrastructurePath,
         input: query,
-        stdio: ['pipe', 'inherit', 'inherit'],
+        stdio: ['pipe', 'pipe', 'pipe'],
         encoding: 'utf8'
       });
+
+      if (result.stdout) process.stdout.write(result.stdout);
+      if (result.stderr) process.stderr.write(result.stderr);
 
       if (result.status !== 0) {
         console.error(chalk.red('\n❌ Could not execute query on the local database container.'));
