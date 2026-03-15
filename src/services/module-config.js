@@ -1,5 +1,21 @@
 // Module configuration - defines files, sections, and dependencies for each module
 const MODULE_CONFIG = {
+  ai: {
+    backend: {
+      files: ['src/modules/domain/ai'],
+      sections: {
+        'src/modules/app/app.module.ts': ['EXTRA_MODULE_IMPORT', 'EXTRA_MODULE'],
+      },
+      dependencies: {
+        '@anthropic-ai/sdk': '^0.39.0',
+      },
+    },
+    infrastructure: {
+      sections: {
+        '.env.example': ['EXTRA_ENV_VARS'],
+      },
+    },
+  },
   blog: {
     website: {
       files: [

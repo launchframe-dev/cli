@@ -6,6 +6,13 @@ const MODULE_REGISTRY = {
     description: 'Markdown-based blog using local .md files with YAML front-matter — no database required',
     services: ['website'],
     version: '1.0.0'
+  },
+  ai: {
+    name: 'ai',
+    displayName: 'AI',
+    description: 'LLM integration via Anthropic SDK — call generateResponse() from LLMService in any backend service',
+    services: ['backend'],
+    version: '1.0.0'
   }
 };
 
