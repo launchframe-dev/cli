@@ -20,30 +20,30 @@ const VARIANT_CONFIG = {
       'multi-tenant': {
         // Complete files/folders to copy
         files: [
-          'src/modules/domain/projects',           // Entire projects module
-          'src/guards/project-ownership.guard.ts', // Project ownership guard (header-based)
-          'src/guards/project-param.guard.ts',     // Project param guard (route-based)
-          'src/modules/users/users.service.ts',    // Users service with multi-tenant support
-          'src/modules/users/users.controller.ts', // Users controller with multi-tenant support
-          'src/modules/users/create-user.dto.ts'   // CreateUserDto with businessId
+          'src/domain/projects',                    // Entire projects module
+          'src/core/guards/project-ownership.guard.ts', // Project ownership guard (header-based)
+          'src/core/guards/project-param.guard.ts',     // Project param guard (route-based)
+          'src/core/users/users.service.ts',        // Users service with multi-tenant support
+          'src/core/users/users.controller.ts',     // Users controller with multi-tenant support
+          'src/core/users/create-user.dto.ts'       // CreateUserDto with businessId
         ],
 
         // Code sections to insert into base template files
         // Note: main.ts uses PRIMARY_DOMAIN env var for dynamic CORS - no sections needed
         sections: {
-          'src/modules/app/app.module.ts': [
+          'src/core/app/app.module.ts': [
             'PROJECTS_MODULE_IMPORT',       // Add ProjectsModule import
             'PROJECTS_MODULE'               // Add ProjectsModule to imports array
           ],
-          'src/modules/auth/auth.module.ts': [
+          'src/core/auth/auth.module.ts': [
             'MULTI_TENANT_IMPORTS',         // Add Project entity import
             'MULTI_TENANT_TYPEORM'          // Add Project to TypeOrmModule
           ],
-          'src/modules/users/user.entity.ts': [
+          'src/core/users/user.entity.ts': [
             'PROJECTS_RELATIONSHIP_IMPORT', // Add Project entity import
             'PROJECTS_RELATIONSHIP'         // Add projects relationship
           ],
-          'src/modules/users/users.module.ts': [
+          'src/core/users/users.module.ts': [
             'MULTI_TENANT_IMPORTS',          // Add Projects-related imports
             'MULTI_TENANT_ENTITIES',         // Add Project entities to TypeORM
             'MULTI_TENANT_MODULE_IMPORTS',   // Add ProjectsModule to imports
@@ -56,25 +56,25 @@ const VARIANT_CONFIG = {
       'b2b2c': {
         // Complete files to copy
         files: [
-          'src/modules/users/user-business.entity.ts',           // Business-to-user linking entity
-          'src/modules/auth/auth-customer.ts',                   // Customer auth config (regular_user, customer_ cookie)
-          'src/modules/auth/better-auth-customer.controller.ts', // Customer auth controller (/api/auth/customer)
-          'src/modules/auth/auth.module.ts',                     // Auth module with customer controller
-          'src/modules/auth/better-auth.guard.ts',               // Guard handling both auth instances
+          'src/core/users/user-business.entity.ts',           // Business-to-user linking entity
+          'src/core/auth/auth-customer.ts',                   // Customer auth config (regular_user, customer_ cookie)
+          'src/core/auth/better-auth-customer.controller.ts', // Customer auth controller (/api/auth/customer)
+          'src/core/auth/auth.module.ts',                     // Auth module with customer controller
+          'src/core/auth/better-auth.guard.ts',               // Guard handling both auth instances
         ],
 
         // Code sections to insert
         sections: {
-          'src/modules/users/user.entity.ts': [
+          'src/core/users/user.entity.ts': [
             'B2B2C_IMPORTS',           // Add UserBusiness import
             'B2B2C_USER_ROLE',         // Add REGULAR_USER enum value
             'B2B2C_RELATIONSHIPS'      // Add userBusinesses relationship
           ],
-          'src/modules/users/users.module.ts': [
+          'src/core/users/users.module.ts': [
             'B2B2C_IMPORTS',           // Add UserBusiness import
             'B2B2C_ENTITIES'           // Add UserBusiness to TypeORM
           ],
-          'src/database/migrations/1764300000001-CreateSessionsTable.ts': [
+          'src/core/database/migrations/1764300000001-CreateSessionsTable.ts': [
             'B2B2C_TENANT_COLUMN'      // Add tenant_id column for session scoping
           ]
         }
@@ -84,36 +84,36 @@ const VARIANT_CONFIG = {
       'b2b2c_single-tenant': {
         // Complete files to copy (B2B2C features without multi-tenant projects)
         files: [
-          'src/guards/business-scoping.guard.ts',                         // Business scoping guard
-          'src/modules/domain/business/business.controller.ts',           // Business lookup controller
-          'src/modules/domain/business/business.service.ts',              // Business lookup service
-          'src/modules/domain/business/business.module.ts',               // Business module
-          'src/modules/domain/business/entities/business.entity.ts',      // Business entity
-          'src/modules/domain/business/dto/business-response.dto.ts',     // Business response DTO
-          'src/modules/domain/business/dto/create-business.dto.ts',       // Business create DTO
-          'src/database/migrations/1766688416362-CreateBusinessesTable.ts', // Businesses table migration
-          'src/modules/domain/items/items.controller.ts',                 // Items with business scoping
-          'src/modules/domain/items/items.service.ts',                    // Items service with business scoping
-          'src/modules/domain/items/item.entity.ts',                      // Item entity with businessId
-          'src/modules/domain/items/dto/create-item.dto.ts',              // Create item DTO
-          'src/modules/domain/items/dto/update-item.dto.ts',              // Update item DTO
-          'src/modules/auth/auth.module.ts',                              // Auth module with Business entity
-          'src/modules/auth/auth.controller.ts',                          // Auth controller with magic-link (B2B2C)
-          'src/modules/auth/auth.service.ts',                             // Auth service with magic-link (B2B2C)
-          'src/modules/auth/jwt-auth.guard.ts',                           // JWT authentication guard
-          'src/modules/users/user-business.entity.ts',                    // Business-to-user linking entity
-          'src/modules/users/users.module.ts',                            // Users module with Business entity
-          'src/modules/users/users.controller.ts',                        // Users controller (B2B2C)
-          'src/modules/users/users.service.ts',                           // Users service (B2B2C)
-          'src/modules/users/create-user.dto.ts'                          // CreateUserDto with businessId
+          'src/core/guards/business-scoping.guard.ts',                         // Business scoping guard
+          'src/domain/business/business.controller.ts',           // Business lookup controller
+          'src/domain/business/business.service.ts',              // Business lookup service
+          'src/domain/business/business.module.ts',               // Business module
+          'src/domain/business/entities/business.entity.ts',      // Business entity
+          'src/domain/business/dto/business-response.dto.ts',     // Business response DTO
+          'src/domain/business/dto/create-business.dto.ts',       // Business create DTO
+          'src/core/database/migrations/1766688416362-CreateBusinessesTable.ts', // Businesses table migration
+          'src/domain/items/items.controller.ts',                 // Items with business scoping
+          'src/domain/items/items.service.ts',                    // Items service with business scoping
+          'src/domain/items/item.entity.ts',                      // Item entity with businessId
+          'src/domain/items/dto/create-item.dto.ts',              // Create item DTO
+          'src/domain/items/dto/update-item.dto.ts',              // Update item DTO
+          'src/core/auth/auth.module.ts',                              // Auth module with Business entity
+          'src/core/auth/auth.controller.ts',                          // Auth controller with magic-link (B2B2C)
+          'src/core/auth/auth.service.ts',                             // Auth service with magic-link (B2B2C)
+          'src/core/auth/jwt-auth.guard.ts',                           // JWT authentication guard
+          'src/core/users/user-business.entity.ts',                    // Business-to-user linking entity
+          'src/core/users/users.module.ts',                            // Users module with Business entity
+          'src/core/users/users.controller.ts',                        // Users controller (B2B2C)
+          'src/core/users/users.service.ts',                           // Users service (B2B2C)
+          'src/core/users/create-user.dto.ts'                          // CreateUserDto with businessId
         ],
 
         sections: {
-          'src/modules/app/app.module.ts': [
+          'src/core/app/app.module.ts': [
             'BUSINESS_MODULE_IMPORT',    // Import BusinessModule
             'BUSINESS_MODULE'             // Add BusinessModule to imports
           ],
-          'src/modules/users/user.entity.ts': [
+          'src/core/users/user.entity.ts': [
             'BUSINESS_RELATIONSHIP_IMPORT', // Import Business entity
             'BUSINESS_RELATIONSHIP'         // Add business relationship
           ]
@@ -124,11 +124,11 @@ const VARIANT_CONFIG = {
       'b2b2c_multi-tenant': {
         // Complete files to copy (has both multi-tenant and B2B2C features)
         files: [
-          'src/modules/users/user-business.entity.ts',         // Business-to-user linking entity
-          'src/modules/auth/auth.ts',                          // Combined Better Auth config
-          'src/modules/users/users.service.ts',                // Combined users service
-          'src/modules/users/users.controller.ts',             // Combined users controller
-          'src/modules/domain/projects/projects.module.ts'     // Projects module with UserBusiness
+          'src/core/users/user-business.entity.ts',         // Business-to-user linking entity
+          'src/core/auth/auth.ts',                          // Combined Better Auth config
+          'src/core/users/users.service.ts',                // Combined users service
+          'src/core/users/users.controller.ts',             // Combined users controller
+          'src/domain/projects/projects.module.ts'          // Projects module with UserBusiness
         ],
 
         // No sections needed - complete files already have all features

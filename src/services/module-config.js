@@ -2,9 +2,9 @@
 const MODULE_CONFIG = {
   ai: {
     backend: {
-      files: ['src/modules/domain/ai'],
+      files: ['src/domain/ai'],
       sections: {
-        'src/modules/app/app.module.ts': ['EXTRA_MODULE_IMPORT', 'EXTRA_MODULE'],
+        'src/core/app/app.module.ts': ['EXTRA_MODULE_IMPORT', 'EXTRA_MODULE'],
       },
       dependencies: {
         '@anthropic-ai/sdk': '^0.39.0',

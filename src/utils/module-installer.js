@@ -18,7 +18,7 @@ async function installModule(moduleName, moduleConfig) {
     const serviceDir = path.join(cwd, serviceName);
 
     // Copy files
-    for (const filePath of config.files) {
+    for (const filePath of (config.files || [])) {
       const src = path.join(moduleFilesDir, filePath);
       const dest = path.join(serviceDir, filePath);
       console.log(`  Adding ${filePath}`);
@@ -26,7 +26,7 @@ async function installModule(moduleName, moduleConfig) {
     }
 
     // Inject sections
-    for (const [targetFile, markerNames] of Object.entries(config.sections)) {
+    for (const [targetFile, markerNames] of Object.entries(config.sections || {})) {
       const targetFilePath = path.join(serviceDir, targetFile);
       const targetBasename = path.basename(targetFile);
 
@@ -34,7 +34,11 @@ async function installModule(moduleName, moduleConfig) {
         const sectionFile = path.join(moduleSectionsDir, `${targetBasename}.${markerName}`);
         console.log(`  Injecting ${markerName} into ${targetFile}`);
         const sectionContent = await fs.readFile(sectionFile, 'utf8');
-        await replaceSection(targetFilePath, markerName, sectionContent);
+        try {
+          await replaceSection(targetFilePath, markerName, sectionContent);
+        } catch (err) {
+          console.warn(`  ⚠ Skipping ${markerName} in ${targetFile}: ${err.message}`);
+        }
       }
     }
 
