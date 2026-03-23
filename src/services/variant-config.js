@@ -92,15 +92,7 @@ const VARIANT_CONFIG = {
           'src/domain/business/dto/business-response.dto.ts',     // Business response DTO
           'src/domain/business/dto/create-business.dto.ts',       // Business create DTO
           'src/core/database/migrations/1766688416362-CreateBusinessesTable.ts', // Businesses table migration
-          'src/domain/items/items.controller.ts',                 // Items with business scoping
-          'src/domain/items/items.service.ts',                    // Items service with business scoping
-          'src/domain/items/item.entity.ts',                      // Item entity with businessId
-          'src/domain/items/dto/create-item.dto.ts',              // Create item DTO
-          'src/domain/items/dto/update-item.dto.ts',              // Update item DTO
-          'src/core/auth/auth.module.ts',                              // Auth module with Business entity
-          'src/core/auth/auth.controller.ts',                          // Auth controller with magic-link (B2B2C)
-          'src/core/auth/auth.service.ts',                             // Auth service with magic-link (B2B2C)
-          'src/core/auth/jwt-auth.guard.ts',                           // JWT authentication guard
+          'src/core/auth/auth.ts',                                     // Better Auth config with Business entity
           'src/core/users/user-business.entity.ts',                    // Business-to-user linking entity
           'src/core/users/users.module.ts',                            // Users module with Business entity
           'src/core/users/users.controller.ts',                        // Users controller (B2B2C)
