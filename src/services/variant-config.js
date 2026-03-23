@@ -279,7 +279,7 @@ const VARIANT_CONFIG = {
     filesDir: 'customers-portal/variants/files',
 
     variants: {
-      'single-tenant': {
+      'b2b2c_single-tenant': {
         // Single-tenant uses section overrides for business endpoints
         files: [],
         sections: {
