@@ -2,19 +2,14 @@
 
 > Ship your B2B SaaS to production in hours, not months.
 
----
-
-**🚀 We're looking for beta testers!** Get free lifetime access to LaunchFrame [here](https://launchframe.dev/#beta-signup). Limited spots available.
-
----
-
 LaunchFrame is a production-ready SaaS boilerplate that deploys to a single affordable VPS. Get subscriptions, credits, multi-tenancy, feature gating, and API management out of the box.
 
 ![LaunchFrame CLI Preview](https://unpkg.com/@launchframe/cli@latest/cli.png)
 
 ## What You Get
 
-- **Single VPS deployment**: Everything runs on one $7-20/mo server (Docker + Traefik)
+- **MCP server**: with conventions, scaffolding and CLI tooling to build your SaaS faster
+- **Single VPS deployment**: Everything runs on one affordable server (Docker + Traefik)
 - **Variant selection on init**: Choose single/multi-tenant, B2B/B2B2C - optimized for your use case
 - **Service registry**: Add new services (docs, waitlist, admin tools) with zero config
 - **Full-stack TypeScript**: NestJS backend, React frontends, Next.js marketing site
