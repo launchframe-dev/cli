@@ -121,7 +121,8 @@ async function main() {
       await init({
         projectName: flags['project-name'],
         tenancy: flags['tenancy'],
-        userModel: flags['user-model']
+        userModel: flags['user-model'],
+        permissions: flags['permissions']
       });
       break;
     case 'deploy:configure':

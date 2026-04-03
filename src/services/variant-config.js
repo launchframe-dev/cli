@@ -169,6 +169,7 @@ const VARIANT_CONFIG = {
           'src/core/team/entities/user-role-assignment.entity.ts',
           'src/core/team/team.service.ts',
           'src/core/team/team.controller.ts',
+          'src/core/database/migrations/1767100000001-AddProjectIdToUserRoleAssignments.ts',
         ],
         sections: {},
       }
@@ -336,6 +337,7 @@ const VARIANT_CONFIG = {
           'src/admin/pages/AdminRoles.tsx',
           'src/admin/pages/AdminPermissions.tsx',
           'src/pages/Team.tsx',
+          'src/pages/AcceptInvite.tsx',
         ],
         sections: {
           'src/App.tsx': [
@@ -344,6 +346,8 @@ const VARIANT_CONFIG = {
             'RBAC_ADMIN_ROUTES',
             'RBAC_TEAM_IMPORT',
             'RBAC_TEAM_ROUTE',
+            'RBAC_INVITE_IMPORT',
+            'RBAC_INVITE_ROUTE',
           ],
           'src/components/Layout.tsx': [
             'RBAC_ADMIN_MENU_ITEMS',
@@ -355,6 +359,7 @@ const VARIANT_CONFIG = {
       'rbac_multi-tenant': {
         files: [
           'src/pages/Team.tsx',
+          'src/core/database/migrations/1767100000001-AddProjectIdToUserRoleAssignments.ts',
         ],
         sections: {},
       }

@@ -103,11 +103,13 @@ async function init(options = {}) {
 
       variantChoices = {
         tenancy: tenancyMap[options.tenancy],
-        userModel: options.userModel
+        userModel: options.userModel,
+        permissions: options.permissions || 'basic'
       };
 
       logger.detail(`Tenancy: ${options.tenancy}`);
       logger.detail(`User model: ${options.userModel}`);
+      logger.detail(`Permissions: ${variantChoices.permissions}`);
     } else {
       variantChoices = await runVariantPrompts();
     }
@@ -142,7 +144,8 @@ async function init(options = {}) {
       command: 'init',
       success: true,
       tenancy: variantChoices.tenancy,
-      user_model: variantChoices.userModel
+      user_model: variantChoices.userModel,
+      permissions: variantChoices.permissions
     });
 
     console.log(chalk.green.bold('\nProject created successfully!\n'));
