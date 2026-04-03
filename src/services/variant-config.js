@@ -159,6 +159,9 @@ const VARIANT_CONFIG = {
             'RBAC_ADMIN_PROVIDERS',
             'RBAC_ADMIN_CONTROLLERS',
           ],
+          'src/core/users/users.controller.ts': [
+            'RBAC_RETURN_ISOWNER',             // Add isOwner and businessId to profile response
+          ],
         },
       },
 
@@ -171,7 +174,17 @@ const VARIANT_CONFIG = {
           'src/core/team/team.controller.ts',
           'src/core/database/migrations/1767100000001-AddProjectIdToUserRoleAssignments.ts',
         ],
-        sections: {},
+        sections: {
+          'src/domain/projects/services/projects.service.ts': [
+            'RBAC_DATASOURCE_IMPORT',           // Add DataSource import
+            'RBAC_DATASOURCE_CONSTRUCTOR',       // Inject DataSource into constructor
+            'RBAC_ACCESSIBLE_PROJECTS_METHOD',   // Add getAccessibleProjectsForMember method
+          ],
+          'src/core/users/users.controller.ts': [
+            'RBAC_MT_GET_PROJECTS',             // Override to use accessible projects for invited members
+            'RBAC_MT_RETURN_FIELDS',            // Add isOwner and businessId to profile response
+          ],
+        },
       }
     },
 
@@ -301,17 +314,17 @@ const VARIANT_CONFIG = {
 
       'b2b2c': {
         files: [
-          'src/pages/Users.tsx'         // Users page for managing end customers
+          'src/pages/Customers.tsx'      // Customers page for managing end customers
         ],
 
         sections: {
           'src/components/Layout.tsx': [
-            'B2B2C_USER_ICON_IMPORT',   // Import UserIcon for Users menu
-            'B2B2C_USERS_MENU'          // Add Users menu item for customer management
+            'B2B2C_CUSTOMER_ICON_IMPORT',   // Import UserIcon for Customers menu
+            'B2B2C_CUSTOMERS_MENU'          // Add Customers menu item for customer management
           ],
           'src/App.tsx': [
-            'B2B2C_USERS_IMPORT',       // Import Users page component
-            'B2B2C_USERS_ROUTE'         // Add /users route
+            'B2B2C_CUSTOMERS_IMPORT',       // Import Customers page component
+            'B2B2C_CUSTOMERS_ROUTE'         // Add /customers route
           ]
         }
       },
@@ -348,10 +361,14 @@ const VARIANT_CONFIG = {
             'RBAC_TEAM_ROUTE',
             'RBAC_INVITE_IMPORT',
             'RBAC_INVITE_ROUTE',
+            'RBAC_B2B2C_ONBOARDING_CHECK',     // Override: only redirect owners to /business
           ],
           'src/components/Layout.tsx': [
             'RBAC_ADMIN_MENU_ITEMS',
             'RBAC_TEAM_MENU_ITEM',
+          ],
+          'src/types/index.ts': [
+            'ISOWNER_FIELD',               // Add isOwner to User interface
           ],
         },
       },
@@ -359,9 +376,15 @@ const VARIANT_CONFIG = {
       'rbac_multi-tenant': {
         files: [
           'src/pages/Team.tsx',
-          'src/core/database/migrations/1767100000001-AddProjectIdToUserRoleAssignments.ts',
         ],
-        sections: {},
+        sections: {
+          'src/App.tsx': [
+            'RBAC_MT_ONBOARDING_CHECK',    // Override: only redirect owners to /first-project
+          ],
+          'src/types/index.ts': [
+            'ISOWNER_FIELD',               // Add isOwner to User interface
+          ],
+        },
       }
     },
 
