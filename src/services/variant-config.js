@@ -125,6 +125,52 @@ const VARIANT_CONFIG = {
 
         // No sections needed - complete files already have all features
         sections: {}
+      },
+
+      // RBAC variant: Adds role-based permission system
+      'rbac': {
+        files: [
+          'src/core/auth/auth.ts',
+          'src/core/auth/permissions.enum.ts',
+          'src/core/auth/permissions.seeder.ts',
+          'src/core/auth/guards/permission.guard.ts',
+          'src/core/auth/decorators/requires-permission.decorator.ts',
+          'src/core/roles/role.entity.ts',
+          'src/core/roles/permission.entity.ts',
+          'src/core/roles/roles.module.ts',
+          'src/core/roles/roles.controller.ts',
+          'src/core/roles/roles.service.ts',
+          'src/core/team/team.module.ts',
+          'src/core/team/team.controller.ts',
+          'src/core/team/team.service.ts',
+          'src/core/team/entities/user-role-assignment.entity.ts',
+          'src/core/team/entities/team-invitation.entity.ts',
+          'src/core/team/dtos/invite-team-member.dto.ts',
+          'src/core/team/dtos/finalize-invite.dto.ts',
+          'src/core/database/migrations/1767100000000-CreateRbacTables.ts',
+        ],
+        sections: {
+          'src/core/users/user.entity.ts': ['RBAC_COLUMNS'],
+          'src/core/auth/auth.module.ts': ['RBAC_GUARDS_IMPORT', 'RBAC_GUARDS'],
+          'src/core/app/app.module.ts': ['RBAC_MODULE_IMPORT', 'RBAC_MODULE'],
+          'src/core/admin/admin.module.ts': [
+            'RBAC_ADMIN_IMPORTS',
+            'RBAC_ADMIN_TYPEORM',
+            'RBAC_ADMIN_PROVIDERS',
+            'RBAC_ADMIN_CONTROLLERS',
+          ],
+        },
+      },
+
+      // RBAC + Multi-tenant: adds projectId to assignments and project-scoped guard
+      'rbac_multi-tenant': {
+        files: [
+          'src/core/auth/guards/permission.guard.ts',
+          'src/core/team/entities/user-role-assignment.entity.ts',
+          'src/core/team/team.service.ts',
+          'src/core/team/team.controller.ts',
+        ],
+        sections: {},
       }
     },
 
@@ -164,6 +210,23 @@ const VARIANT_CONFIG = {
           }
         ],
         default: 'b2b'
+      },
+      permissions: {
+        message: 'Do you need role-based access control (RBAC) for team members?',
+        choices: [
+          {
+            name: 'Basic — single role per user, no team management',
+            value: 'basic',
+            description: 'Each user has one role. No team invitations or per-route permission guards.',
+            isDefault: true,
+          },
+          {
+            name: 'RBAC — roles, permissions, team invitations',
+            value: 'rbac',
+            description: 'Full RBAC: superadmin defines roles, owners invite team members, PermissionGuard protects routes.',
+          },
+        ],
+        default: 'basic',
       }
     }
   },
@@ -266,6 +329,34 @@ const VARIANT_CONFIG = {
             'BUSINESS_ROUTE'               // Add /business route
           ]
         }
+      },
+
+      'rbac': {
+        files: [
+          'src/admin/pages/AdminRoles.tsx',
+          'src/admin/pages/AdminPermissions.tsx',
+          'src/pages/Team.tsx',
+        ],
+        sections: {
+          'src/App.tsx': [
+            'RBAC_ADMIN_ROLES_IMPORT',
+            'RBAC_ADMIN_PERMISSIONS_IMPORT',
+            'RBAC_ADMIN_ROUTES',
+            'RBAC_TEAM_IMPORT',
+            'RBAC_TEAM_ROUTE',
+          ],
+          'src/components/Layout.tsx': [
+            'RBAC_ADMIN_MENU_ITEMS',
+            'RBAC_TEAM_MENU_ITEM',
+          ],
+        },
+      },
+
+      'rbac_multi-tenant': {
+        files: [
+          'src/pages/Team.tsx',
+        ],
+        sections: {},
       }
     },
 
@@ -391,6 +482,7 @@ function resolveVariantChoices(backendChoices) {
   // Special case: admin-portal inherits BOTH tenancy and userModel
   if (choices['admin-portal']) {
     choices['admin-portal'].userModel = backendChoices.userModel;
+    choices['admin-portal'].permissions = backendChoices.permissions;
   }
 
   // Special case: customers-portal inherits BOTH tenancy and userModel
@@ -437,6 +529,15 @@ function getVariantsToApply(choices) {
     variantsToApply.push('single-tenant');
   }
   // else: B2B + Single-tenant (base template, no variants)
+
+  const isRbac = choices.permissions === 'rbac';
+
+  if (isRbac && isMultiTenant) {
+    variantsToApply.push('rbac');
+    variantsToApply.push('rbac_multi-tenant');
+  } else if (isRbac) {
+    variantsToApply.push('rbac');
+  }
 
   return variantsToApply;
 }
