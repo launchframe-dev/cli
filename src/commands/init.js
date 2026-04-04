@@ -1,11 +1,57 @@
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const chalk = require('chalk');
+const inquirer = require('inquirer');
+const { execSync } = require('child_process');
 const { runInitPrompts, runVariantPrompts } = require('../prompts');
 const { generateProject } = require('../generator');
 const { isLaunchFrameProject } = require('../utils/project-helpers');
 const logger = require('../utils/logger');
 const { trackEvent } = require('../utils/telemetry');
+
+// License key config helpers
+const CONFIG_PATH = path.join(os.homedir(), '.launchframe', 'config.json');
+const PROXY_CLONE_URL = 'https://api.launchframe.dev/git/services';
+
+function readConfig() {
+  try {
+    if (fs.existsSync(CONFIG_PATH)) {
+      return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    }
+  } catch {}
+  return {};
+}
+
+function writeConfig(data) {
+  const dir = path.dirname(CONFIG_PATH);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const existing = readConfig();
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify({ ...existing, ...data }, null, 2));
+}
+
+function isValidUUID(str) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
+async function getLicenseKey(promptFn) {
+  const config = readConfig();
+  if (config.licenseKey && isValidUUID(config.licenseKey)) {
+    return config.licenseKey;
+  }
+
+  const { licenseKey } = await promptFn([
+    {
+      type: 'input',
+      name: 'licenseKey',
+      message: 'Enter your LaunchFrame license key:',
+      validate: (val) => isValidUUID(val) || 'Please enter a valid license key (UUID format)',
+    },
+  ]);
+
+  writeConfig({ licenseKey });
+  return licenseKey;
+}
 
 /**
  * Check if running in development mode (local) vs production (npm install)
@@ -27,22 +73,6 @@ async function init(options = {}) {
 
   // Check if in development mode
   const devMode = isDevMode();
-
-  if (!devMode) {
-    // Production mode: Check GitHub access
-    console.log(chalk.gray('Checking repository access...'));
-
-    const accessCheck = await checkGitHubAccess();
-
-    if (!accessCheck.hasAccess) {
-      showAccessDeniedMessage();
-      trackEvent('command_executed', { command: 'init', success: false, error_message: 'access_denied' });
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      process.exit(1);
-    }
-
-    console.log(chalk.green('Repository access confirmed\n'));
-  }
 
   // Check if already in a LaunchFrame project
   if (isLaunchFrameProject()) {
@@ -121,17 +151,43 @@ async function init(options = {}) {
 
     // Determine template source
     let templateRoot;
+    let tmpDir;
 
     if (devMode) {
       templateRoot = path.resolve(__dirname, '../../../services');
       logger.detail(`[DEV MODE] Using local services: ${templateRoot}`);
     } else {
+      // Get license key (from cache or prompt)
+      const licenseKey = await getLicenseKey(inquirer.prompt.bind(inquirer));
+
+      // Clone from proxy into a temp directory
+      tmpDir = path.join(os.tmpdir(), `lf-clone-${Date.now()}`);
+
+      console.log('\n📦 Fetching LaunchFrame services...\n');
+
       try {
-        templateRoot = await ensureCacheReady(requiredServices);
-      } catch (error) {
-        console.error(chalk.red(`Error: ${error.message}\n`));
+        const cloneUrl = PROXY_CLONE_URL.replace('https://', `https://git:${licenseKey}@`);
+        execSync(`git clone --depth 1 ${cloneUrl} ${tmpDir}`, { stdio: 'pipe' });
+      } catch (err) {
+        const stderr = err.stderr?.toString() ?? '';
+        // Detect 402 Payment Required (trial limit exceeded)
+        if (stderr.includes('402') || stderr.includes('Trial limit')) {
+          console.error('\n✗ You have used your free trial init.');
+          console.error('  Purchase a full license to create unlimited projects and deploy to production.');
+          console.error('  Upgrade at: https://admin.launchframe.dev/purchase\n');
+        } else if (stderr.includes('403') || stderr.includes('Invalid')) {
+          console.error('\n✗ Invalid or revoked license key.');
+          console.error('  Check your key at: https://admin.launchframe.dev\n');
+          // Clear cached key so they can re-enter
+          writeConfig({ licenseKey: null });
+        } else {
+          console.error('\n✗ Failed to fetch LaunchFrame services:', stderr);
+        }
         process.exit(1);
       }
+
+      // templateRoot now points to the cloned tmp directory
+      templateRoot = tmpDir;
     }
 
     // Generate project
@@ -150,6 +206,13 @@ async function init(options = {}) {
     console.log(chalk.white('Next steps:'));
     console.log(chalk.gray(`  cd ${answers.projectName}`));
     console.log(chalk.gray('  launchframe docker:up\n'));
+
+    // Clean up tmp clone
+    if (tmpDir) {
+      try {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      } catch {}
+    }
 
   } catch (error) {
     console.error(chalk.red('Error:'), error.message);
