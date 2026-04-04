@@ -265,7 +265,9 @@ async function insertVariantSections(variantName, sections, sectionsDir, destina
 
     logger.detail(`Processing ${filePath}`, 4);
 
-    for (const sectionName of sectionNames) {
+    for (const sectionEntry of sectionNames) {
+      const sectionName = typeof sectionEntry === 'string' ? sectionEntry : sectionEntry.name;
+      const optional = typeof sectionEntry === 'object' && sectionEntry.optional === true;
       try {
         const fileName = path.basename(filePath);
         const sectionFileName = `${fileName}.${sectionName}`;
@@ -280,7 +282,11 @@ async function insertVariantSections(variantName, sections, sectionsDir, destina
         await replaceSection(targetFilePath, sectionName, sectionContent);
         logger.detail(`Inserted [${sectionName}]`, 5);
       } catch (error) {
-        logger.warn(`Could not insert section ${sectionName}: ${error.message}`);
+        if (optional) {
+          logger.detail(`Skipping optional section ${sectionName}: ${error.message}`, 5);
+        } else {
+          logger.warn(`Could not insert section ${sectionName}: ${error.message}`);
+        }
       }
     }
   }

@@ -182,7 +182,6 @@ const VARIANT_CONFIG = {
           ],
           'src/core/users/users.controller.ts': [
             'RBAC_MT_GET_PROJECTS',             // Override to use accessible projects for invited members
-            'RBAC_MT_RETURN_FIELDS',            // Add isOwner and businessId to profile response
           ],
         },
       }
@@ -361,7 +360,7 @@ const VARIANT_CONFIG = {
             'RBAC_TEAM_ROUTE',
             'RBAC_INVITE_IMPORT',
             'RBAC_INVITE_ROUTE',
-            'RBAC_B2B2C_ONBOARDING_CHECK',     // Override: only redirect owners to /business
+            { name: 'RBAC_B2B2C_ONBOARDING_CHECK', optional: true },  // Only for b2b2c single-tenant
           ],
           'src/components/Layout.tsx': [
             'RBAC_ADMIN_MENU_ITEMS',
@@ -380,9 +379,6 @@ const VARIANT_CONFIG = {
         sections: {
           'src/App.tsx': [
             'RBAC_MT_ONBOARDING_CHECK',    // Override: only redirect owners to /first-project
-          ],
-          'src/types/index.ts': [
-            'ISOWNER_FIELD',               // Add isOwner to User interface
           ],
         },
       }
