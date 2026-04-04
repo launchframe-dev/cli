@@ -61,7 +61,7 @@ async function serviceAdd(serviceName, flags = {}) {
     }
   }
 
-  // STEP 3: Get service files (from cache in production, local in dev)
+  // STEP 3: Get service files (from git proxy in production, local in dev)
   const installPath = path.resolve(process.cwd(), serviceName);
 
   if (fs.existsSync(installPath)) {
