@@ -245,6 +245,29 @@ async function init(options = {}) {
       permissions: variantChoices.permissions
     });
 
+    // Record successful init against the license
+    if (!devMode && licenseKey) {
+      try {
+        const https = require('https');
+        await new Promise((resolve) => {
+          const body = '';
+          const req = https.request(
+            'https://api.launchframe.dev/licenses/record-init',
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${licenseKey}`,
+                'Content-Length': 0,
+              },
+            },
+            (res) => { res.resume(); resolve(); }
+          );
+          req.on('error', () => resolve()); // non-fatal
+          req.end();
+        });
+      } catch {}
+    }
+
     console.log(chalk.green.bold('\nProject created successfully!\n'));
     console.log(chalk.white('Next steps:'));
     console.log(chalk.gray(`  cd ${answers.projectName}`));
