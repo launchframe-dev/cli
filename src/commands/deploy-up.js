@@ -2,14 +2,71 @@ const chalk = require('chalk');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const ora = require('ora');
+const https = require('https');
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
 const { requireProject, getProjectConfig } = require('../utils/project-helpers');
 
 const execAsync = promisify(exec);
+
+const CONFIG_PATH = path.join(os.homedir(), '.launchframe', 'config.json');
+
+function getCachedLicenseKey() {
+  try {
+    const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    return config.licenseKey || null;
+  } catch {
+    return null;
+  }
+}
+
+async function checkLicenseCanDeploy(licenseKey) {
+  return new Promise((resolve) => {
+    const req = https.request(
+      {
+        hostname: 'api.launchframe.dev',
+        path: '/licenses/check',
+        method: 'GET',
+        headers: { Authorization: `Bearer ${licenseKey}` },
+        timeout: 5000,
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch {
+            resolve(null);
+          }
+        });
+      },
+    );
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
+    req.end();
+  });
+}
 
 /**
  * Start services on VPS using Docker context
  */
 async function deployUp() {
+  // License check — soft gate
+  const licenseKey = getCachedLicenseKey();
+  if (licenseKey) {
+    const licenseInfo = await checkLicenseCanDeploy(licenseKey);
+    if (licenseInfo === null) {
+      console.warn('\n⚠  Could not verify license. Proceeding anyway.\n');
+    } else if (!licenseInfo.canDeploy) {
+      console.error('\n✗ Production deployment requires a full LaunchFrame license.');
+      console.error('  Your current license is on a free trial (1 init, no deployment).');
+      console.error('  Upgrade at: https://admin.launchframe.dev/purchase\n');
+      process.exit(1);
+    }
+  }
+
   requireProject();
 
   console.log(chalk.blue.bold('\n🚀 LaunchFrame Service Deployment\n'));
