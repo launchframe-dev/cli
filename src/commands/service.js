@@ -7,8 +7,6 @@ const { SERVICE_REGISTRY } = require('../services/registry');
 const { isLaunchFrameProject, getProjectConfig, updateProjectConfig, getPrimaryDomain } = require('../utils/project-helpers');
 const { replaceVariables } = require('../utils/variable-replacer');
 const { updateEnvFile } = require('../utils/env-generator');
-const { checkGitHubAccess, showAccessDeniedMessage } = require('../utils/github-access');
-const { ensureCacheReady, getServicePath } = require('../utils/service-cache');
 
 async function serviceAdd(serviceName, flags = {}) {
   // STEP 1: Validation
@@ -87,26 +85,9 @@ async function serviceAdd(serviceName, flags = {}) {
       process.exit(1);
     }
   } else {
-    // Production mode: Check access and use cache
-    console.log(chalk.blue('\n🔍 Checking repository access...'));
-    
-    const accessCheck = await checkGitHubAccess();
-    
-    if (!accessCheck.hasAccess) {
-      showAccessDeniedMessage();
-      process.exit(1);
-    }
-    
-    console.log(chalk.green('✓ Repository access confirmed'));
-    
-    try {
-      // Ensure cache has this service
-      await ensureCacheReady([serviceName]);
-      sourceDir = getServicePath(serviceName);
-    } catch (error) {
-      console.error(chalk.red(`\n❌ Error: ${error.message}\n`));
-      process.exit(1);
-    }
+    // Production mode: TODO — Task 14 will implement git proxy clone here
+    console.error(chalk.red('Error: Production mode service installation not yet implemented'));
+    process.exit(1);
   }
 
   // Copy service from source to installation path

@@ -42,7 +42,6 @@ const {
   serviceRemove
 } = require('./commands/service');
 const { moduleAdd, moduleList } = require('./commands/module');
-const { cacheClear, cacheInfo, cacheUpdate } = require('./commands/cache');
 const { devAddUser } = require('./commands/dev-add-user');
 const { devQueue } = require('./commands/dev-queue');
 const { devLogo } = require('./commands/dev-logo');
@@ -214,15 +213,6 @@ async function main() {
       break;
     case 'module:list':
       await moduleList();
-      break;
-    case 'cache:clear':
-      await cacheClear(flags);
-      break;
-    case 'cache:info':
-      await cacheInfo();
-      break;
-    case 'cache:update':
-      await cacheUpdate();
       break;
     case 'dev:add-user':
       await devAddUser();
