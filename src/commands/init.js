@@ -85,6 +85,46 @@ async function init(options = {}) {
     // Get license key upfront (from cache or prompt) before asking project questions
     if (!devMode) {
       var licenseKey = await getLicenseKey(inquirer.prompt.bind(inquirer));
+
+      // Validate key immediately via a HEAD request to the git proxy
+      process.stdout.write('Validating license key...');
+      try {
+        const https = require('https');
+        await new Promise((resolve, reject) => {
+          const auth = Buffer.from(`git:${licenseKey}`).toString('base64');
+          const req = https.request(
+            `${PROXY_CLONE_URL}/info/refs?service=git-upload-pack`,
+            { method: 'GET', headers: { Authorization: `Basic ${auth}` } },
+            (res) => {
+              if (res.statusCode === 200) {
+                process.stdout.write(' ✓\n');
+                resolve();
+              } else if (res.statusCode === 402) {
+                reject(new Error('TRIAL_LIMIT'));
+              } else {
+                reject(new Error('INVALID_KEY'));
+              }
+              res.resume();
+            }
+          );
+          req.on('error', () => reject(new Error('NETWORK_ERROR')));
+          req.end();
+        });
+      } catch (err) {
+        process.stdout.write('\n');
+        if (err.message === 'TRIAL_LIMIT') {
+          console.error(chalk.red('\n✗ You have used your free trial init.'));
+          console.error('  Purchase a full license to create unlimited projects and deploy to production.');
+          console.error('  Upgrade at: https://admin.launchframe.dev/purchase\n');
+        } else if (err.message === 'INVALID_KEY') {
+          console.error(chalk.red('\n✗ Invalid or revoked license key.'));
+          console.error('  Check your key at: https://admin.launchframe.dev\n');
+          writeConfig({ licenseKey: null });
+        } else {
+          console.error(chalk.yellow('\n⚠ Could not validate license key (network error). Proceeding anyway.\n'));
+        }
+        if (err.message !== 'NETWORK_ERROR') process.exit(1);
+      }
     }
 
     let answers;
