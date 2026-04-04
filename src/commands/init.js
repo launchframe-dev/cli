@@ -183,6 +183,7 @@ async function init(options = {}) {
         } else {
           console.error('\n✗ Failed to fetch LaunchFrame services:', stderr);
         }
+        try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
         process.exit(1);
       }
 
