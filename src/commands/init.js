@@ -82,6 +82,11 @@ async function init(options = {}) {
   }
 
   try {
+    // Get license key upfront (from cache or prompt) before asking project questions
+    if (!devMode) {
+      var licenseKey = await getLicenseKey(inquirer.prompt.bind(inquirer));
+    }
+
     let answers;
 
     // If project name provided via flag, skip prompts
@@ -157,9 +162,6 @@ async function init(options = {}) {
       templateRoot = path.resolve(__dirname, '../../../services');
       logger.detail(`[DEV MODE] Using local services: ${templateRoot}`);
     } else {
-      // Get license key (from cache or prompt)
-      const licenseKey = await getLicenseKey(inquirer.prompt.bind(inquirer));
-
       // Clone from proxy into a temp directory
       tmpDir = path.join(os.tmpdir(), `lf-clone-${Date.now()}`);
 
