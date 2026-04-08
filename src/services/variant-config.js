@@ -162,6 +162,10 @@ const VARIANT_CONFIG = {
           'src/core/users/users.controller.ts': [
             'RBAC_RETURN_ISOWNER',             // Add isOwner and businessId to profile response
           ],
+          'src/core/users/dtos/user-query.dto.ts': [
+            'RBAC_BUSINESS_ID',
+            'RBAC_IS_NOT_EMPTY_VALIDATOR'
+          ]
         },
       },
 
