@@ -244,6 +244,21 @@ const VARIANT_CONFIG = {
           },
         ],
         default: 'basic',
+      },
+      direction: {
+        message: 'What is the primary text direction of your application?',
+        choices: [
+          {
+            name: 'LTR — Left-to-right (English, French, etc.)',
+            value: 'ltr',
+            isDefault: true,
+          },
+          {
+            name: 'RTL — Right-to-left (Hebrew, Arabic, etc.)',
+            value: 'rtl',
+          },
+        ],
+        default: 'ltr',
       }
     }
   },

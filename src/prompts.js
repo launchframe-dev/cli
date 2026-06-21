@@ -211,17 +211,34 @@ async function runVariantPrompts() {
     }
   ]);
 
+  // Prompt for direction
+  const directionAnswer = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'direction',
+      message: prompts.direction.message,
+      choices: prompts.direction.choices.map(choice => ({
+        name: choice.name,
+        value: choice.value,
+        short: choice.value
+      })),
+      default: prompts.direction.default
+    }
+  ]);
+
   const variantChoices = {
     tenancy: tenancyAnswer.tenancy,
     userModel: userModelAnswer.userModel,
-    permissions: permissionsAnswer.permissions
+    permissions: permissionsAnswer.permissions,
+    direction: directionAnswer.direction
   };
 
   // Show summary
   console.log('\n✅ Configuration:');
   console.log(`   User Model: ${variantChoices.userModel}`);
   console.log(`   Tenancy: ${variantChoices.tenancy}`);
-  console.log(`   Permissions: ${variantChoices.permissions}\n`);
+  console.log(`   Permissions: ${variantChoices.permissions}`);
+  console.log(`   Direction: ${variantChoices.direction}\n`);
 
   return variantChoices;
 }

@@ -51,6 +51,7 @@ async function generateProject(answers, variantChoices, templateRoot) {
     '{{PROJECT_NAME_UPPER}}': answers.projectNameUpper,
     '{{PROJECT_DISPLAY_NAME}}': answers.projectDisplayName,
     '{{PROJECT_DESCRIPTION}}': answers.projectDescription,
+    '{{DIR}}': variantChoices.direction || 'ltr',
     // Leave these as template variables for deploy:configure to replace
     '{{GITHUB_ORG}}': '{{GITHUB_ORG}}',
     '{{PRIMARY_DOMAIN}}': '{{PRIMARY_DOMAIN}}',

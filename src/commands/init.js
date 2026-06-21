@@ -73,6 +73,10 @@ async function init(options = {}) {
 
   // Check if in development mode
   const devMode = isDevMode();
+  if (devMode) {
+    const localServicesPath = path.resolve(__dirname, '../../../services');
+    console.log(chalk.yellow(`⚠ Using local services: ${localServicesPath}\n`));
+  }
 
   // Check if already in a LaunchFrame project
   if (isLaunchFrameProject()) {
@@ -169,6 +173,10 @@ async function init(options = {}) {
         throw new Error('Invalid --user-model value. Must be "b2b" or "b2b2c"');
       }
 
+      if (options.direction && !['ltr', 'rtl'].includes(options.direction)) {
+        throw new Error('Invalid --direction value. Must be "ltr" or "rtl"');
+      }
+
       const tenancyMap = {
         'single': 'single-tenant',
         'multi': 'multi-tenant'
@@ -177,12 +185,14 @@ async function init(options = {}) {
       variantChoices = {
         tenancy: tenancyMap[options.tenancy],
         userModel: options.userModel,
-        permissions: options.permissions || 'basic'
+        permissions: options.permissions || 'basic',
+        direction: options.direction || 'ltr'
       };
 
       logger.detail(`Tenancy: ${options.tenancy}`);
       logger.detail(`User model: ${options.userModel}`);
       logger.detail(`Permissions: ${variantChoices.permissions}`);
+      logger.detail(`Direction: ${variantChoices.direction}`);
     } else {
       variantChoices = await runVariantPrompts();
     }
@@ -242,7 +252,8 @@ async function init(options = {}) {
       success: true,
       tenancy: variantChoices.tenancy,
       user_model: variantChoices.userModel,
-      permissions: variantChoices.permissions
+      permissions: variantChoices.permissions,
+      direction: variantChoices.direction
     });
 
     // Record successful init against the license
